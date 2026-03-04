@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum StatusCliente {
+  ATIVA
+  INATIVA
+  FINALIZADA
+  CANCELADA
+}
+
+enum FaseProcesso {
+  CADASTRO
+  ANALISE_DOCUMENTOS
+  AGUARDANDO_CONTRATO
+  CONTRATO_ENVIADO
+  AGUARDANDO_ASSINATURA
+  PROCESSO_FINALIZADO
+}           
+
+enum StatusContrato {
+  NAO_ENVIADO
+  ENVIADO
+  ASSINADO
+  CANCELADO  
+}          
+  
+enum StatusNascimento {
+  AGUARDANDO
+  NASCEU
+  NAO_INFORMADO  
+}        
+
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+  ATRASADO
+  CANCELADO
+}
+
+model Cliente {
+  idCliente               String   @id @default(uuid())
+
+  nomeCompleto            String
+  cpf                     String
+  telefone                String
+  email                   String?
+  instagram               String?      // opcional
+  origemParceira          String?
+  recebeBolsaFamilia      Boolean
+
+  tempoGestacaoSemanas    Int?
+  dataProvavelParto       DateTime?
+  mesParto                Int?
+  anoParto                Int?
+
+  possuiSenhaGov          Boolean
+  senhaGov                String?
+
+  statusCliente           StatusCliente
+  faseProcesso            FaseProcesso
+  statusContrato          StatusContrato
+  statusNascimento        StatusNascimento
+
+  dataCadastro            DateTime
+  dataEnvioContrato       DateTime?
+  dataAssinatura          DateTime?
+
+  alertaParto30Dias       Boolean @default(false)
+  alertaParto15Dias       Boolean @default(false)
+
+  observacoes             String?   // opcional
+
+  pagamentos Pagamento[]
+
+  createdAt               DateTime @default(now())
+}
+
+model Pagamento {
+  id             String   @id @default(uuid())
+  clienteId      String
+  cliente        Cliente  @relation(fields: [clienteId], references: [idCliente])
+
+  valor          Float
+  dataVencimento DateTime
+  dataPagamento  DateTime?
+
+  status         StatusPagamento
+
+  createdAt      DateTime @default(now())
+}
