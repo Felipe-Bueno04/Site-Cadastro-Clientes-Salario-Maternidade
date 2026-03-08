@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma"
-import { Prisma, StatusCliente, FaseProcesso } from "@prisma/client"
+import { Prisma, Cliente, StatusCliente, FaseProcesso } from "@prisma/client"
 import Link from "next/link"
 import StatusFilter from "./[id]/components/StatusFilter"
 import FaseFilter from "./[id]/components/FaseFilter"
@@ -12,7 +12,6 @@ interface PageProps {
     page?: string
     status?: StatusCliente
     fase?: FaseProcesso
-    direction?: "asc" | "desc"
   }>
 }
 
@@ -23,14 +22,10 @@ export default async function Clientes({ searchParams }: PageProps) {
   const page = params?.page
   const status = params?.status
   const fase = params?.fase
-  const direction = params?.direction
 
   const paginaAtual = Number(page) || 1
   const itensPorPagina = 10
   const skip = (paginaAtual - 1) * itensPorPagina
-
-  const direcaoOrdenacao: Prisma.SortOrder =
-    direction === "asc" ? "asc" : "desc"
 
   const where: Prisma.ClienteWhereInput = {
     ...(busca && {
@@ -63,7 +58,7 @@ export default async function Clientes({ searchParams }: PageProps) {
   const clientes = await prisma.cliente.findMany({
     where,
     orderBy: {
-      nomeCompleto: direcaoOrdenacao,
+      createdAt: "desc",
     },
     take: itensPorPagina,
     skip,
@@ -76,17 +71,7 @@ export default async function Clientes({ searchParams }: PageProps) {
       busca ? `&busca=${busca}` : ""
     }${status ? `&status=${status}` : ""}${
       fase ? `&fase=${fase}` : ""
-    }&direction=${direcaoOrdenacao}`
-  }
-
-  function gerarLinkOrdenacao() {
-    const novaDirecao = direcaoOrdenacao === "asc" ? "desc" : "asc"
-
-    return `/clientes?${
-      busca ? `busca=${busca}&` : ""
-    }${status ? `status=${status}&` : ""}${
-      fase ? `fase=${fase}&` : ""
-    }direction=${novaDirecao}`
+    }`
   }
 
   const thStyle = {
@@ -182,11 +167,7 @@ export default async function Clientes({ searchParams }: PageProps) {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead style={{ backgroundColor: "#f9fafb" }}>
             <tr>
-              <th style={thStyle}>
-                <Link href={gerarLinkOrdenacao()}>
-                  Nome {direcaoOrdenacao === "asc" ? "↑" : "↓"}
-                </Link>
-              </th>
+              <th style={thStyle}>Nome</th>
 
               <th style={thStyle}>CPF</th>
               <th style={thStyle}>Telefone</th>
@@ -202,7 +183,7 @@ export default async function Clientes({ searchParams }: PageProps) {
           </thead>
 
           <tbody>
-            {clientes.map((cliente) => (
+            {clientes.map((cliente: Cliente) => (
               <tr
                 key={cliente.idCliente}
                 style={{ borderTop: "1px solid #f1f5f9" }}
@@ -211,7 +192,7 @@ export default async function Clientes({ searchParams }: PageProps) {
                   <Link
                     href={`/clientes/${cliente.idCliente}`}
                     style={{
-                      color: "#2563eb",
+                      color: "#000000",
                       fontWeight: 500,
                       textDecoration: "none",
                     }}
