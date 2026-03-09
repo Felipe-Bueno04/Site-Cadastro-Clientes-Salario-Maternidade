@@ -3,6 +3,8 @@ import { Prisma, Cliente, StatusCliente, FaseProcesso } from "@prisma/client"
 import Link from "next/link"
 import StatusFilter from "./[id]/components/StatusFilter"
 import FaseFilter from "./[id]/components/FaseFilter"
+import { getAlertaParto } from "@/lib/alertaParto"
+import { calcularResumoAlertas } from "@/lib/alertaParto"
 
 export const dynamic = "force-dynamic"
 
@@ -65,6 +67,7 @@ export default async function Clientes({ searchParams }: PageProps) {
   })
 
   const totalPaginas = Math.ceil(totalClientes / itensPorPagina)
+  const resumo = calcularResumoAlertas(clientes)
 
   function gerarLinkPagina(p: number) {
     return `/clientes?page=${p}${
@@ -154,6 +157,49 @@ export default async function Clientes({ searchParams }: PageProps) {
           Buscar
         </button>
       </form>
+      
+      <div
+        style={{
+          display: "flex",
+          gap: "20px",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+        }}
+        >
+
+        <div
+          style={{
+            background: "#fee2e2",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontWeight: 600
+          }}
+        >
+          🔴 {resumo.parto15} partos em até 15 dias
+        </div>
+
+        <div
+          style={{
+            background: "#fef9c3",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontWeight: 600
+          }}
+        >
+          🟡 {resumo.parto30} partos em até 30 dias
+        </div>
+
+        <div
+          style={{
+            background: "#fecaca",
+            padding: "12px 16px",
+            borderRadius: "8px",
+            fontWeight: 600
+          }}
+        >
+          ⚠️ {resumo.atrasados} partos atrasados
+        </div>
+      </div>
 
       {/* TABELA */}
       <div
@@ -179,35 +225,49 @@ export default async function Clientes({ searchParams }: PageProps) {
               <th style={thStyle}>
                 <FaseFilter />
               </th>
+
+              <th style={thStyle}>Alerta</th>
             </tr>
           </thead>
 
           <tbody>
-            {clientes.map((cliente: Cliente) => (
-              <tr
-                key={cliente.idCliente}
-                style={{ borderTop: "1px solid #f1f5f9" }}
-              >
-                <td style={tdStyle}>
-                  <Link
-                    href={`/clientes/${cliente.idCliente}`}
-                    style={{
-                      color: "#000000",
-                      fontWeight: 500,
-                      textDecoration: "none",
-                    }}
-                  >
-                    {cliente.nomeCompleto}
-                  </Link>
-                </td>
+            {clientes.map((cliente: Cliente) => {
+              const alerta = getAlertaParto(cliente.dataProvavelParto)
 
-                <td style={tdStyle}>{cliente.cpf}</td>
-                <td style={tdStyle}>{cliente.telefone}</td>
+              return (
+                <tr
+                  key={cliente.idCliente}
+                  style={{
+                    borderTop: "1px solid #f1f5f9",
+                    backgroundColor: alerta?.cor ?? "transparent",
+                  }}
+                >
+                  <td style={tdStyle}>
+                    <Link
+                      href={`/clientes/${cliente.idCliente}`}
+                      style={{
+                        color: "#2563eb",
+                        fontWeight: 500,
+                        textDecoration: "none",
+                      }}
+                    >
+                      {cliente.nomeCompleto}
+                    </Link>
+                  </td>
 
-                <td style={tdStyle}>{cliente.statusCliente}</td>
-                <td style={tdStyle}>{cliente.faseProcesso}</td>
-              </tr>
-            ))}
+                  <td style={tdStyle}>{cliente.cpf}</td>
+                  <td style={tdStyle}>{cliente.telefone}</td>
+
+                  <td style={tdStyle}>{cliente.statusCliente}</td>
+                  <td style={tdStyle}>{cliente.faseProcesso}</td>
+
+                  <td style={tdStyle}>
+                    {alerta?.texto ?? ""}
+                  </td>
+
+                </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
