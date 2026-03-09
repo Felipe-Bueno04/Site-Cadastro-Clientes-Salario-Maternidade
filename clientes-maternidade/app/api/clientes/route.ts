@@ -10,12 +10,27 @@ export async function POST(req: Request) {
       cpf: data.cpf,
       telefone: data.telefone,
       email: data.email || null,
-      recebeBolsaFamilia: false,
-      possuiSenhaGov: false,
-      statusCliente: "ATIVA",
-      faseProcesso: "CADASTRO",
-      statusContrato: "NAO_ENVIADO",
-      statusNascimento: "AGUARDANDO",
+      instagram: data.instagram || null,
+      origemParceira: data.origemParceira || null,
+
+      recebeBolsaFamilia: data.recebeBolsaFamilia ?? false,
+
+      dataProvavelParto: data.dataProvavelParto
+        ? new Date(data.dataProvavelParto)
+        : null,
+
+      tempoGestacaoSemanas: data.tempoGestacaoSemanas || null,
+
+      possuiSenhaGov: data.possuiSenhaGov ?? false,
+      senhaGov: data.senhaGov || null,
+
+      statusCliente: data.statusCliente || "ATIVA",
+      faseProcesso: data.faseProcesso || "CADASTRO",
+      statusContrato: data.statusContrato || "NAO_ENVIADO",
+      statusNascimento: data.statusNascimento || "AGUARDANDO",
+
+      observacoes: data.observacoes || null,
+
       dataCadastro: new Date(),
     },
   })
