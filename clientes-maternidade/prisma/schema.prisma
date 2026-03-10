@@ -84,12 +84,21 @@ model Cliente {
 
 model Pagamento {
   id             String   @id @default(uuid())
+
   clienteId      String
   cliente        Cliente  @relation(fields: [clienteId], references: [idCliente])
 
+  descricao      String?
+
   valor          Float
+
+  parcela        Int?
+  totalParcelas  Int?
+
   dataVencimento DateTime
   dataPagamento  DateTime?
+
+  formaPagamento String?
 
   status         StatusPagamento
 
