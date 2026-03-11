@@ -13,7 +13,7 @@ async function criarPagamento(formData: FormData) {
     data: {
       clienteId,
       valor,
-      dataVencimento: new Date(dataVencimento),
+      dataVencimento: new Date(dataVencimento + "T00:00:00"),
       status: "PENDENTE"
     }
   })

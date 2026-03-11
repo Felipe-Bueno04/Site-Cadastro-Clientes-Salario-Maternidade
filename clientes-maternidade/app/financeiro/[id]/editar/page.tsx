@@ -16,7 +16,7 @@ async function atualizarPagamento(formData: FormData) {
     },
     data: {
       valor,
-      dataVencimento: new Date(dataVencimento),
+      dataVencimento: new Date(dataVencimento + "T00:00:00"),
       status
     }
   })

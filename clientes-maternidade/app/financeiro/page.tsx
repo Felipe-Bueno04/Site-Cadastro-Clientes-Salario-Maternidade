@@ -171,7 +171,7 @@ export default async function FinanceiroPage() {
                   </td>
 
                   <td style={tdStyle}>
-                    {vencimento.toLocaleDateString()}
+                    {vencimento.toLocaleDateString("pt-BR", { timeZone: "UTC" })}
                   </td>
 
                   <td style={tdStyle}>
