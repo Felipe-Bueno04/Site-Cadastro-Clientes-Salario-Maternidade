@@ -134,12 +134,22 @@ export default async function FinanceiroPage() {
                 pagamento.status !== "PAGO" &&
                 vencimento < hoje
 
+              let corLinha = "transparent"
+
+              if (pagamento.status === "PAGO") {
+                corLinha = "#96eeb5" // verde claro
+              }
+
+              if (atrasado) {
+                corLinha = "#f1adad" // vermelho claro
+              }
+
               return (
                 <tr
                   key={pagamento.id}
                   style={{
                     borderTop: "1px solid #f1f5f9",
-                    backgroundColor: atrasado ? "#fee2e2" : "transparent",
+                    backgroundColor: corLinha,
                   }}
                 >
                   <td style={tdStyle}>
