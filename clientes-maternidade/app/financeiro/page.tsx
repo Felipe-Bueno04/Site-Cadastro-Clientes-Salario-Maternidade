@@ -154,7 +154,7 @@ export default async function FinanceiroPage() {
                 >
                   <td style={tdStyle}>
                     <Link
-                      href={`/financeiro/${pagamento.id}/editar`}
+                      href={`/financeiro/${pagamento.id}`}
                       style={{
                         color: "#2563eb",
                         fontWeight: 500,

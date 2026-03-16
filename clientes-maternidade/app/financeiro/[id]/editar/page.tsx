@@ -1,150 +1,160 @@
 import { prisma } from "@/lib/prisma"
-import { redirect } from "next/navigation"
+import { redirect, notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
+
+interface Props {
+  params: Promise<{
+    id: string
+  }>
+}
 
 async function atualizarPagamento(formData: FormData) {
   "use server"
 
   const id = formData.get("id") as string
+
+  const descricao = formData.get("descricao") as string
   const valor = Number(formData.get("valor"))
+  const parcela = Number(formData.get("parcela"))
+  const totalParcelas = Number(formData.get("totalParcelas"))
+
   const dataVencimento = formData.get("dataVencimento") as string
+  const dataPagamento = formData.get("dataPagamento") as string
+
+  const formaPagamento = formData.get("formaPagamento") as string
   const status = formData.get("status") as any
 
   await prisma.pagamento.update({
-    where: {
-      id
-    },
+    where: { id },
+
     data: {
+      descricao,
       valor,
+      parcela: parcela || null,
+      totalParcelas: totalParcelas || null,
       dataVencimento: new Date(dataVencimento + "T00:00:00"),
+      dataPagamento: dataPagamento
+        ? new Date(dataPagamento + "T00:00:00")
+        : null,
+      formaPagamento,
       status
     }
   })
 
   revalidatePath("/financeiro")
 
-  redirect("/financeiro")
+  redirect(`/financeiro/${id}`)
 }
 
-async function excluirPagamento(formData: FormData) {
-  "use server"
-
-  const id = formData.get("id") as string
-
-  await prisma.pagamento.delete({
-    where: {
-      id
-    }
-  })
-
-  revalidatePath("/financeiro")
-
-  redirect("/financeiro")
-}
-
-export default async function EditarPagamentoPage({
-  params
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function EditarPagamento({ params }: Props) {
 
   const { id } = await params
 
   const pagamento = await prisma.pagamento.findUnique({
-    where: {
-      id: id
-    },
-    include: {
-      cliente: true
-    }
+
+    where: { id: id },
+    include: { cliente: true }
   })
 
   if (!pagamento) {
-    return <div>Pagamento não encontrado</div>
+    notFound()
   }
 
-  return (
-    <div style={{ padding: "40px" }}>
+  const dataVencimento = pagamento.dataVencimento
+    .toISOString()
+    .split("T")[0]
 
-      <h1 style={{ fontSize: "26px", marginBottom: "20px" }}>
-        Editar pagamento
+  const dataPagamento = pagamento.dataPagamento
+    ? pagamento.dataPagamento.toISOString().split("T")[0]
+    : ""
+
+  return (
+    <div style={{ padding: "40px", fontFamily: "Inter, sans-serif" }}>
+
+      <h1 style={{ fontSize: "28px", fontWeight: 600 }}>
+        Editar Pagamento
       </h1>
 
-      <form 
-        action={atualizarPagamento} 
+      <form
+        action={atualizarPagamento}
         style={{
+          marginTop: "30px",
           display: "flex",
           flexDirection: "column",
-          gap: "10px",
-          maxWidth: "500px",
+          gap: "14px",
+          maxWidth: "500px"
         }}
       >
+
         <input type="hidden" name="id" value={pagamento.id} />
 
-        <div>
-          <label>Cliente</label>
-          <div className="border p-2 bg-gray-100">
-            {pagamento.cliente.nomeCompleto}
-          </div>
-        </div>
+        <label>Cliente</label>
+        <input value={pagamento.cliente.nomeCompleto} disabled />
 
-        <div>
-          <label>Valor</label>
-          <input
-            name="valor"
-            type="number"
-            step="0.01"
-            defaultValue={pagamento.valor}
-            className="border p-2 w-full"
-          />
-        </div>
+        <label>Descrição</label>
+        <input name="descricao" defaultValue={pagamento.descricao ?? ""} />
 
-        <div>
-          <label>Data vencimento</label>
-          <input
-            type="date"
-            name="dataVencimento"
-            defaultValue={
-              pagamento.dataVencimento
-                .toISOString()
-                .split("T")[0]
-            }
-            className="border p-2 w-full"
-          />
-        </div>
+        <label>Valor</label>
+        <input
+          type="number"
+          step="0.01"
+          name="valor"
+          defaultValue={pagamento.valor}
+        />
 
-        <div>
-          <label>Status</label>
-          <select
-            name="status"
-            defaultValue={pagamento.status}
-            className="border p-2 w-full"
-          >
-            <option value="PENDENTE">PENDENTE</option>
-            <option value="PAGO">PAGO</option>
-            <option value="ATRASADO">ATRASADO</option>
-            <option value="CANCELADO">CANCELADO</option>
-          </select>
-        </div>
+        <label>Parcela</label>
+        <input
+          type="number"
+          name="parcela"
+          defaultValue={pagamento.parcela ?? ""}
+        />
+
+        <label>Total de parcelas</label>
+        <input
+          type="number"
+          name="totalParcelas"
+          defaultValue={pagamento.totalParcelas ?? ""}
+        />
+
+        <label>Data de vencimento</label>
+        <input
+          type="date"
+          name="dataVencimento"
+          defaultValue={dataVencimento}
+        />
+
+        <label>Data de pagamento</label>
+        <input
+          type="date"
+          name="dataPagamento"
+          defaultValue={dataPagamento}
+        />
+
+        <label>Forma de pagamento</label>
+        <input
+          name="formaPagamento"
+          defaultValue={pagamento.formaPagamento ?? ""}
+        />
+
+        <label>Status</label>
+        <select name="status" defaultValue={pagamento.status}>
+          <option value="PENDENTE">Pendente</option>
+          <option value="PAGO">Pago</option>
+        </select>
 
         <button
           type="submit"
-          className="bg-blue-600 text-white p-2 rounded"
+          style={{
+            marginTop: "10px",
+            backgroundColor: "#2563eb",
+            color: "white",
+            border: "none",
+            padding: "10px",
+            borderRadius: "8px",
+            cursor: "pointer"
+          }}
         >
           Salvar alterações
-        </button>
-
-      </form>
-
-      <form action={excluirPagamento} className="mt-4">
-
-        <input type="hidden" name="id" value={pagamento.id} />
-
-        <button
-          type="submit"
-          className="bg-red-600 text-white p-2 rounded"
-        >
-          Excluir pagamento
         </button>
 
       </form>
