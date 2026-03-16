@@ -14,6 +14,7 @@ interface PageProps {
     page?: string
     status?: StatusCliente
     fase?: FaseProcesso
+    alerta?: string
   }>
 }
 
@@ -21,9 +22,10 @@ export default async function Clientes({ searchParams }: PageProps) {
   const params = await searchParams
 
   const busca = params?.busca
-  const page = params?.page
+  const page = Number(params?.page || 1)
   const status = params?.status
   const fase = params?.fase
+  const alerta = params?.alerta
 
   const paginaAtual = Number(page) || 1
   const itensPorPagina = 10
@@ -53,6 +55,47 @@ export default async function Clientes({ searchParams }: PageProps) {
     ...(fase && {
       faseProcesso: fase,
     }),
+  }
+
+  const hoje = new Date()
+  hoje.setHours(0,0,0,0)
+
+  if (alerta === "15dias") {
+
+    const limite = new Date()
+    limite.setDate(limite.getDate() + 15)
+    limite.setHours(23,59,59,999)
+
+    where.dataProvavelParto = {
+      // gte = greater than or equal
+      gte: hoje,
+      // lte = less than or equal
+      lte: limite
+    }
+  }
+
+  if (alerta === "30dias") {
+
+    const inicio = new Date()
+    inicio.setDate(inicio.getDate() + 16)
+    inicio.setHours(0,0,0,0)
+
+    const limite = new Date()
+    limite.setDate(limite.getDate() + 30)
+    limite.setHours(23,59,59,999)
+
+    where.dataProvavelParto = {
+      // gte = greater than or equal
+      gte: inicio,
+      // lte = less than or equal
+      lte: limite
+    }
+  }
+
+  if (alerta === "atrasado") {
+    where.dataProvavelParto = {
+      lt: hoje
+    }
   }
 
   const totalClientes = await prisma.cliente.count({ where })

@@ -13,6 +13,7 @@ export default async function Dashboard() {
   const resumoClientes = calcularResumoAlertas(clientes)
 
   const hoje = new Date()
+  hoje.setHours(0,0,0,0)
 
   const semana = new Date()
   semana.setDate(hoje.getDate() + 7)
@@ -30,15 +31,24 @@ export default async function Dashboard() {
     (c) => c.faseProcesso === "ANALISE_DOCUMENTOS"
   )
 
-  const pagamentosAtrasados = pagamentos.filter(
-    (p) =>
-      p.status !== "PAGO" &&
-      new Date(p.dataVencimento) < hoje
-  )
+  const totalAtrasados = await prisma.pagamento.count({
+  where: {
+    status: { not: "PAGO" },
+    dataVencimento: { lt: hoje }
+  }
+})
 
-  const pagamentosPendentes = pagamentos.filter(
-    (p) => p.status === "PENDENTE"
-  )
+  const totalPendentes = await prisma.pagamento.count({
+    where: {
+      status: {
+        not: "PAGO"
+      },
+      dataVencimento: {
+        // gte = greater than or equal
+        gte: hoje
+      }
+    }
+  })
 
   const pagamentosPagos = pagamentos.filter(
     (p) => p.status === "PAGO"
@@ -113,17 +123,17 @@ export default async function Dashboard() {
       <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
 
         <Link
-          href="/financeiro?status=ATRASADO"
+          href="/financeiro?alerta=atrasados"
           style={{ ...cardStyle, background: "#fecaca" }}
         >
-          ⚠️ {pagamentosAtrasados.length} pagamentos atrasados
+          ⚠️ {totalAtrasados} pagamentos atrasados
         </Link>
 
         <Link
-          href="/financeiro?status=PENDENTE"
+          href="/financeiro?alerta=pendentes"
           style={{ ...cardStyle, background: "#fef9c3" }}
         >
-          🟡 {pagamentosPendentes.length} pagamentos pendentes
+          🟡 {totalPendentes} pagamentos pendentes
         </Link>
 
         <Link

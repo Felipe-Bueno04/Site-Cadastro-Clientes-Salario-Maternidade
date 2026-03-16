@@ -20,9 +20,53 @@ async function marcarComoPago(formData: FormData) {
   revalidatePath("/financeiro")
 }
 
-export default async function FinanceiroPage() {
+export default async function FinanceiroPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    status?: string
+    cliente?: string
+    alerta?: string
+  }>
+}) {
+
+  const params = await searchParams
+  
+  const status = params?.status
+  const clienteBusca = params?.cliente
+  const alerta = params?.alerta
+
+  const hoje = new Date()
+  hoje.setHours(0,0,0,0)
+
+  const where: any = {}
+
+  if (alerta === "atrasados") {
+
+    where.status = {
+      not: "PAGO"
+    }
+
+    where.dataVencimento = {
+      // lt = less than 
+      lt: hoje
+    }
+  }
+
+  if (alerta === "pendentes") {
+
+    where.status = {
+      not: "PAGO"
+    }
+
+    where.dataVencimento = {
+      // gte = greater than or equal
+      gte: hoje
+    }
+  }
 
   const pagamentos = await prisma.pagamento.findMany({
+    where,
     include: {
       cliente: true
     },
@@ -31,13 +75,17 @@ export default async function FinanceiroPage() {
     }
   })
 
-  const hoje = new Date()
-
-  const pagamentosAtrasados = pagamentos.filter(
-    (p) =>
-      p.status !== "PAGO" &&
-      new Date(p.dataVencimento) < hoje
-  )
+  const totalAtrasados = await prisma.pagamento.count({
+    where: {
+      status: {
+        not: "PAGO"
+      },
+      dataVencimento: {
+        // lt = less than 
+        lt: hoje
+      }
+    }
+  })
 
   const thStyle = {
     textAlign: "left" as const,
@@ -93,16 +141,22 @@ export default async function FinanceiroPage() {
         }}
       >
 
-        <div
-          style={{
-            background: "#fecaca",
-            padding: "12px 16px",
-            borderRadius: "8px",
-            fontWeight: 600
-          }}
+        <Link
+          href="/financeiro?alerta=atrasados"
+          style={{ textDecoration: "none" }}
         >
-          ⚠️ {pagamentosAtrasados.length} pagamentos atrasados
-        </div>
+          <div
+            style={{
+              background: "#fecaca",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}
+          >
+            ⚠️ {totalAtrasados} pagamentos atrasados
+          </div>
+        </Link>
 
       </div>
 
@@ -132,7 +186,7 @@ export default async function FinanceiroPage() {
 
               const atrasado =
                 pagamento.status !== "PAGO" &&
-                vencimento < hoje
+                new Date(pagamento.dataVencimento) < hoje
 
               let corLinha = "transparent"
 
@@ -151,6 +205,7 @@ export default async function FinanceiroPage() {
                     borderTop: "1px solid #f1f5f9",
                     backgroundColor: corLinha,
                   }}
+                  className={atrasado ? "bg-red-200" : ""}
                 >
                   <td style={tdStyle}>
                     <Link
