@@ -42,6 +42,15 @@ export default async function FinanceiroPage({
 
   const where: Prisma.PagamentoWhereInput = {}
 
+  if (clienteBusca) {
+      where.cliente = {
+        nomeCompleto: {
+          contains: clienteBusca,
+          mode: "insensitive"
+      }
+    }
+  }
+
   if (alerta === "atrasados") {
 
     where.status = {

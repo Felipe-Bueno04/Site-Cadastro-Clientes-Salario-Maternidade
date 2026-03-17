@@ -8,8 +8,6 @@ export default async function Dashboard() {
 
   const clientes = await prisma.cliente.findMany()
 
-  const pagamentos = await prisma.pagamento.findMany()
-
   const resumoClientes = calcularResumoAlertas(clientes)
 
   const hoje = new Date()
