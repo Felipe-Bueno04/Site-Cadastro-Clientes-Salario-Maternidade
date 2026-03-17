@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { Prisma } from "@prisma/client"
 import Link from "next/link"
 import { revalidatePath } from "next/cache"
 
@@ -39,7 +40,7 @@ export default async function FinanceiroPage({
   const hoje = new Date()
   hoje.setHours(0,0,0,0)
 
-  const where: any = {}
+  const where: Prisma.PagamentoWhereInput = {}
 
   if (alerta === "atrasados") {
 
