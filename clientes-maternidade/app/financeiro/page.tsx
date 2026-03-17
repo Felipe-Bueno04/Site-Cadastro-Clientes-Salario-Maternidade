@@ -65,6 +65,10 @@ export default async function FinanceiroPage({
     }
   }
 
+  if (status === "PAGO") {
+    where.status = "PAGO"
+  }
+
   const pagamentos = await prisma.pagamento.findMany({
     where,
     include: {
