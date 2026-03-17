@@ -60,6 +60,24 @@ export default async function Clientes({ searchParams }: PageProps) {
   const hoje = new Date()
   hoje.setHours(0,0,0,0)
 
+  if (alerta === "semana") {
+
+    const inicioSemana = new Date(hoje)
+    inicioSemana.setDate(hoje.getDate() - hoje.getDay())
+    inicioSemana.setHours(0,0,0,0)
+
+    const fimSemana = new Date(inicioSemana)
+    fimSemana.setDate(inicioSemana.getDate() + 7)
+    fimSemana.setHours(23,59,59,999)
+
+    where.dataProvavelParto = {
+      // gte = greater than or equal
+      gte: inicioSemana,
+      // lte = less than or equal
+      lte: fimSemana
+    }
+  }
+
   if (alerta === "15dias") {
 
     const limite = new Date()
@@ -94,6 +112,7 @@ export default async function Clientes({ searchParams }: PageProps) {
 
   if (alerta === "atrasado") {
     where.dataProvavelParto = {
+      // lt = less than
       lt: hoje
     }
   }
