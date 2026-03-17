@@ -15,44 +15,60 @@ export default async function Dashboard() {
   const hoje = new Date()
   hoje.setHours(0,0,0,0)
 
-  const semana = new Date()
-  semana.setDate(hoje.getDate() + 7)
+  // Semana atual
+  const inicioSemana = new Date(hoje)
+  inicioSemana.setDate(hoje.getDate() - hoje.getDay())
 
-  const partosSemana = clientes.filter((c) => {
+  const fimSemana = new Date(inicioSemana)
+  fimSemana.setDate(inicioSemana.getDate() + 7)
+  fimSemana.setHours(23,59,59,999)
 
-    if (!c.dataProvavelParto) return false
+  const [
+    totalAtrasados,
+    totalPendentes,
+    totalPagos,
+    totalProcessosAnalise,
+    totalPartosSemana
+  ] = await Promise.all([
 
-    const parto = new Date(c.dataProvavelParto)
-
-    return parto >= hoje && parto <= semana
-  })
-
-  const processosAnalise = clientes.filter(
-    (c) => c.faseProcesso === "ANALISE_DOCUMENTOS"
-  )
-
-  const totalAtrasados = await prisma.pagamento.count({
-  where: {
-    status: { not: "PAGO" },
-    dataVencimento: { lt: hoje }
-  }
-})
-
-  const totalPendentes = await prisma.pagamento.count({
-    where: {
-      status: {
-        not: "PAGO"
-      },
-      dataVencimento: {
-        // gte = greater than or equal
-        gte: hoje
+    // 🔴 Atrasados
+    prisma.pagamento.count({
+      where: {
+        status: { not: "PAGO" },
+        dataVencimento: { lt: hoje } // lt = less than
       }
-    }
-  })
+    }),
 
-  const pagamentosPagos = pagamentos.filter(
-    (p) => p.status === "PAGO"
-  )
+    // 🟡 Pendentes
+    prisma.pagamento.count({
+      where: {
+        status: { not: "PAGO" },
+        dataVencimento: { gte: hoje } // gte = greater than or equal
+      }
+    }),
+
+    // 🟢 Pagos
+    prisma.pagamento.count({
+      where: {
+        status: "PAGO"
+      }
+    }),
+
+    // 🏥 Processos em Análise
+    prisma.cliente.count({
+      where: {
+        faseProcesso: "ANALISE_DOCUMENTOS"
+      }
+    }),
+
+    // 📅 Partos nesta semana
+    prisma.cliente.count({
+      where: {
+        // gte = greater than or equal, lte = less than or equal
+        dataProvavelParto: { gte: inicioSemana, lte: fimSemana }
+      }
+    })
+  ])
 
   const cardStyle = {
     padding: "16px 20px",
@@ -102,14 +118,14 @@ export default async function Dashboard() {
           href="/clientes?alerta=semana"
           style={{ ...cardStyle, background: "#dbeafe" }}
         >
-          📅 {partosSemana.length} partos nesta semana
+          📅 {totalPartosSemana} partos nesta semana
         </Link>
 
         <Link
           href="/clientes?fase=ANALISE_DOCUMENTOS"
           style={{ ...cardStyle, background: "#e0f2fe" }}
         >
-          🏥 {processosAnalise.length} processos em análise
+          🏥 {totalProcessosAnalise} processos em análise
         </Link>
 
       </div>
@@ -140,7 +156,7 @@ export default async function Dashboard() {
           href="/financeiro?status=PAGO"
           style={{ ...cardStyle, background: "#dcfce7" }}
         >
-          🟢 {pagamentosPagos.length} pagamentos pagos
+          🟢 {totalPagos} pagamentos pagos
         </Link>
 
       </div>
