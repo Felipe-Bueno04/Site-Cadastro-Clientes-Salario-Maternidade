@@ -43,12 +43,23 @@ export default async function FinanceiroPage({
   const where: Prisma.PagamentoWhereInput = {}
 
   if (clienteBusca) {
-      where.cliente = {
-        nomeCompleto: {
-          contains: clienteBusca,
-          mode: "insensitive"
+    where.OR = [
+      {
+        cliente: {
+          nomeCompleto: {
+            contains: clienteBusca,
+            mode: "insensitive"
+          }
+        }
+      },
+      {
+        cliente: {
+          cpf: {
+            contains: clienteBusca
+          }
+        }
       }
-    }
+    ]
   }
 
   if (alerta === "atrasados") {
@@ -173,6 +184,48 @@ export default async function FinanceiroPage({
         </Link>
 
       </div>
+
+      <form
+        method="GET"
+        style={{
+          marginBottom: "20px",
+          display: "flex",
+          gap: "10px",
+          alignItems: "center",
+        }}
+      >
+
+        <input type="hidden" name="status" value={status || ""} />
+        <input type="hidden" name="alerta" value={alerta || ""} />
+
+        <input
+          type="text"
+          name="cliente"
+          placeholder="Buscar por nome ou CPF..."
+          defaultValue={clienteBusca || ""}
+          style={{
+            padding: "10px 14px",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb",
+            width: "300px",
+            fontSize: "14px",
+          }}
+        />
+
+        <button
+          type="submit"
+          style={{
+            padding: "10px 16px",
+            borderRadius: "8px",
+            border: "none",
+            backgroundColor: "#111827",
+            color: "white",
+            cursor: "pointer",
+          }}
+        >
+          Buscar
+        </button>
+      </form>
 
       {/* TABELA */}
       <div
