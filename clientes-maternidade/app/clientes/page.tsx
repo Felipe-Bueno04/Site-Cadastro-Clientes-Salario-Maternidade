@@ -230,38 +230,50 @@ export default async function Clientes({ searchParams }: PageProps) {
         }}
         >
 
-        <div
-          style={{
+        <Link
+          href="/clientes?alerta=15dias"
+          style={{ textDecoration: "none" }}
+        >
+          <div style={{
             background: "#fee2e2",
             padding: "12px 16px",
             borderRadius: "8px",
-            fontWeight: 600
-          }}
-        >
-          🔴 {resumo.parto15} partos em até 15 dias
-        </div>
+            fontWeight: 600,
+            cursor: "pointer"
+          }}>
+            🔴 {resumo.parto15} partos em até 15 dias
+          </div>
+        </Link>
 
-        <div
-          style={{
+        <Link
+          href="/clientes?alerta=30dias"
+          style={{ textDecoration: "none" }}
+        >
+          <div style={{
             background: "#fef9c3",
             padding: "12px 16px",
             borderRadius: "8px",
-            fontWeight: 600
-          }}
-        >
-          🟡 {resumo.parto30} partos em até 30 dias
-        </div>
+            fontWeight: 600,
+            cursor: "pointer"
+          }}>
+            🟡 {resumo.parto30} partos em até 30 dias
+          </div>
+        </Link>
 
-        <div
-          style={{
+        <Link
+          href="/clientes?alerta=atrasado"
+          style={{ textDecoration: "none" }}
+        >
+          <div style={{
             background: "#fecaca",
             padding: "12px 16px",
             borderRadius: "8px",
-            fontWeight: 600
-          }}
-        >
-          ⚠️ {resumo.atrasados} partos atrasados
-        </div>
+            fontWeight: 600,
+            cursor: "pointer"
+          }}>
+            ⚠️ {resumo.atrasados} partos atrasados
+          </div>
+        </Link>
       </div>
 
       {/* TABELA */}
