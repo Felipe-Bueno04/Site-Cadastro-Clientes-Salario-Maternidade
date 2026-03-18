@@ -129,7 +129,8 @@ export default async function Clientes({ searchParams }: PageProps) {
   })
 
   const totalPaginas = Math.ceil(totalClientes / itensPorPagina)
-  const resumo = calcularResumoAlertas(clientes)
+  const todosClientes = await prisma.cliente.findMany({})
+  const resumo = calcularResumoAlertas(todosClientes)
 
   function gerarLinkPagina(p: number) {
     return `/clientes?page=${p}${
