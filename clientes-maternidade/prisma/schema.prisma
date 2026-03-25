@@ -6,43 +6,7 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-}
-
-enum StatusCliente {
-  ATIVA
-  INATIVA
-  FINALIZADA
-  CANCELADA
-}
-
-enum FaseProcesso {
-  CADASTRO
-  ANALISE_DOCUMENTOS
-  CONTRATO_ENVIADO
-  AGUARDANDO_ASSINATURA
-  PROCESSO_ENVIADO_INSS
-  PROCESSO_FINALIZADO
-}           
-
-enum StatusContrato {
-  NAO_ENVIADO
-  ENVIADO
-  ASSINADO
-  CANCELADO  
-}          
-  
-enum StatusNascimento {
-  AGUARDANDO
-  NASCEU
-  NAO_INFORMADO  
-}        
-
-enum StatusPagamento {
-  PENDENTE
-  PAGO
-  ATRASADO
-  CANCELADO
-}
+}      
 
 model Cliente {
   idCliente               String   @id @default(uuid())
@@ -82,6 +46,35 @@ model Cliente {
   createdAt               DateTime @default(now())
 }
 
+enum StatusCliente {
+  ATIVA
+  INATIVA
+  FINALIZADA
+  CANCELADA
+}
+
+enum FaseProcesso {
+  CADASTRO
+  ANALISE_DOCUMENTOS
+  CONTRATO_ENVIADO
+  AGUARDANDO_ASSINATURA
+  PROCESSO_ENVIADO_INSS
+  PROCESSO_FINALIZADO
+}           
+
+enum StatusContrato {
+  NAO_ENVIADO
+  ENVIADO
+  ASSINADO
+  CANCELADO  
+}          
+  
+enum StatusNascimento {
+  AGUARDANDO
+  NASCEU
+  NAO_INFORMADO  
+}  
+
 model Pagamento {
   id             String   @id @default(uuid())
 
@@ -103,4 +96,25 @@ model Pagamento {
   status         StatusPagamento
 
   createdAt      DateTime @default(now())
+}
+
+enum StatusPagamento {
+  PENDENTE
+  PAGO
+  ATRASADO
+  CANCELADO
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String?
+  email     String   @unique
+  password  String
+  role      Role     @default(PARCEIRO)
+  createdAt DateTime @default(now())
+}
+
+enum Role {
+  ADMIN
+  PARCEIRO
 }
