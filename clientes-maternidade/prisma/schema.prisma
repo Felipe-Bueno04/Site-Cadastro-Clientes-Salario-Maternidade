@@ -6,44 +6,73 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
-}      
+}
 
 model Cliente {
-  idCliente               String   @id @default(uuid())
+  idCliente            String           @id @default(uuid())
+  nomeCompleto         String
+  cpf                  String
+  telefone             String
+  email                String?
+  instagram            String?  
+  origemParceira       String?  
+  recebeBolsaFamilia   Boolean  
+  tempoGestacaoSemanas Int?  
+  dataProvavelParto    DateTime?  
+  mesParto             Int?  
+  anoParto             Int?  
+  possuiSenhaGov       Boolean  
+  senhaGov             String?
+  observacoes          String?
 
-  nomeCompleto            String
-  cpf                     String
-  telefone                String
-  email                   String?
-  instagram               String?      // opcional
-  origemParceira          String?
-  recebeBolsaFamilia      Boolean
+  statusCliente        StatusCliente
+  faseProcesso         FaseProcesso
+  statusContrato       StatusContrato
+  statusNascimento     StatusNascimento  
+  dataCadastro         DateTime
+  dataEnvioContrato    DateTime?
+  dataAssinatura       DateTime?
 
-  tempoGestacaoSemanas    Int?
-  dataProvavelParto       DateTime?
-  mesParto                Int?
-  anoParto                Int?
+  alertaParto30Dias    Boolean          @default(false)
+  alertaParto15Dias    Boolean          @default(false)
 
-  possuiSenhaGov          Boolean
-  senhaGov                String?
+  pagamentos           Pagamento[]
 
-  statusCliente           StatusCliente
-  faseProcesso            FaseProcesso
-  statusContrato          StatusContrato
-  statusNascimento        StatusNascimento
+  adminId              String
+  admin                User             @relation("AdminClientes", fields: [adminId], references: [id])
 
-  dataCadastro            DateTime
-  dataEnvioContrato       DateTime?
-  dataAssinatura          DateTime?
+  createdAt            DateTime         @default(now())
+}
 
-  alertaParto30Dias       Boolean @default(false)
-  alertaParto15Dias       Boolean @default(false)
+model Pagamento {
+  id             String          @id @default(uuid())
+  clienteId      String
+  valor          Float
+  dataVencimento DateTime
+  dataPagamento  DateTime?
+  status         StatusPagamento
+  createdAt      DateTime        @default(now())
+  descricao      String?
+  formaPagamento String?
+  parcela        Int?
+  totalParcelas  Int?
+  cliente        Cliente         @relation(fields: [clienteId], references: [idCliente])
+}
 
-  observacoes             String?   // opcional
+model User {
+  id         String    @id @default(cuid())
+  name       String?
+  email      String    @unique
+  password   String
+  role       Role      @default(PARCEIRO)
 
-  pagamentos Pagamento[]
+  adminId    String?
+  admin      User?     @relation("AdminToPartners", fields: [adminId], references: [id])
+  parceiros  User[]    @relation("AdminToPartners")
 
-  createdAt               DateTime @default(now())
+  clientes  Cliente[]  @relation("AdminClientes")
+
+  createdAt DateTime   @default(now())
 }
 
 enum StatusCliente {
@@ -60,42 +89,19 @@ enum FaseProcesso {
   AGUARDANDO_ASSINATURA
   PROCESSO_ENVIADO_INSS
   PROCESSO_FINALIZADO
-}           
+}
 
 enum StatusContrato {
   NAO_ENVIADO
   ENVIADO
   ASSINADO
-  CANCELADO  
-}          
-  
+  CANCELADO
+}
+
 enum StatusNascimento {
   AGUARDANDO
   NASCEU
-  NAO_INFORMADO  
-}  
-
-model Pagamento {
-  id             String   @id @default(uuid())
-
-  clienteId      String
-  cliente        Cliente  @relation(fields: [clienteId], references: [idCliente])
-
-  descricao      String?
-
-  valor          Float
-
-  parcela        Int?
-  totalParcelas  Int?
-
-  dataVencimento DateTime
-  dataPagamento  DateTime?
-
-  formaPagamento String?
-
-  status         StatusPagamento
-
-  createdAt      DateTime @default(now())
+  NAO_INFORMADO
 }
 
 enum StatusPagamento {
@@ -103,15 +109,6 @@ enum StatusPagamento {
   PAGO
   ATRASADO
   CANCELADO
-}
-
-model User {
-  id        String   @id @default(cuid())
-  name      String?
-  email     String   @unique
-  password  String
-  role      Role     @default(PARCEIRO)
-  createdAt DateTime @default(now())
 }
 
 enum Role {
