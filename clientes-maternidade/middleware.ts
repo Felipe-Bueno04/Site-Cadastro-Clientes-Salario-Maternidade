@@ -7,12 +7,16 @@ export default withAuth(
       authorized: ({ token, req }) => {
         const { pathname } = req.nextUrl
 
+        const adminRoutes = ["/financeiro", "/usuarios"]
+
         // Se não estiver logado → bloqueia
         if (!token) return false
 
-        // Bloquear financeiro para parceiro
+        // Proteção por role (ADMIN)
         if (
-          pathname.startsWith("/financeiro") &&
+          adminRoutes.some((route) => 
+            pathname.startsWith(route)
+          ) &&
           token.role !== "ADMIN"
         ) {
           return false
@@ -25,5 +29,10 @@ export default withAuth(
 )
 
 export const config = {
-  matcher: ["/dashboard", "/clientes", "/financeiro"],
+  matcher: [
+    "/dashboard", 
+    "/clientes", 
+    "/financeiro",
+    "/usuarios"
+  ],
 }
