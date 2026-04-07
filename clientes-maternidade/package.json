@@ -37,8 +37,5 @@
   "rules": {
     "no-unused-vars": "warn",
     "react/jsx-uses-vars": "error"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
   }
 }
