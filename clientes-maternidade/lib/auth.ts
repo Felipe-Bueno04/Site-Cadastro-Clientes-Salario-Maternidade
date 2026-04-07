@@ -4,6 +4,14 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import { compare } from "bcryptjs"
 import { NextAuthOptions } from "next-auth"
 
+type AuthUser = {
+        id: string
+        email: string
+        name?: string | null
+        role: "ADMIN" | "PARCEIRO"
+        adminId?: string | null
+}
+
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
 
@@ -38,30 +46,38 @@ export const authOptions: NextAuthOptions = {
 
         if (!isValid) return null
 
-        return {
+        const authUser: AuthUser = {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          adminId: user.adminId,
         }
+
+        return authUser
       },
     }),
   ],
 
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role
+
+      const u = user as AuthUser | undefined
+
+      if (u) {
+        token.role = u.role
+        token.adminId = u.adminId
       }
       return token
     },
 
     async session({ session, token }) {
-      if (session.user) {
-        session.user.role = token.role as "ADMIN" | "PARCEIRO"
-      }
+      session.user.id = token.sub as string
+      session.user.role = token.role as "ADMIN" | "PARCEIRO"
+      session.user.adminId = token.adminId as string | null
+
       return session
-    },
+    }
   },
 
   pages: {
