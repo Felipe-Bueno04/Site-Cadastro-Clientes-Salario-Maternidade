@@ -9,44 +9,46 @@ datasource db {
 }
 
 model Cliente {
-  idCliente            String           @id @default(uuid())
+  idCliente            String    @id @default(uuid())
   nomeCompleto         String
   cpf                  String
   telefone             String
   email                String?
-  instagram            String?  
-  origemParceira       String?  
-  recebeBolsaFamilia   Boolean  
-  tempoGestacaoSemanas Int?  
-  dataProvavelParto    DateTime?  
-  mesParto             Int?  
-  anoParto             Int?  
-  possuiSenhaGov       Boolean  
+  instagram            String?
+  origemParceira       String?
+  recebeBolsaFamilia   Boolean
+  tempoGestacaoSemanas Int?
+  dataProvavelParto    DateTime?
+  mesParto             Int?
+  anoParto             Int?
+  possuiSenhaGov       Boolean
   senhaGov             String?
   observacoes          String?
 
-  statusCliente        StatusCliente
-  faseProcesso         FaseProcesso
-  statusContrato       StatusContrato
-  statusNascimento     StatusNascimento  
-  dataCadastro         DateTime
-  dataEnvioContrato    DateTime?
-  dataAssinatura       DateTime?
+  statusCliente     StatusCliente
+  faseProcesso      FaseProcesso
+  statusContrato    StatusContrato
+  statusNascimento  StatusNascimento
+  dataCadastro      DateTime
+  dataEnvioContrato DateTime?
+  dataAssinatura    DateTime?
 
-  alertaParto30Dias    Boolean          @default(false)
-  alertaParto15Dias    Boolean          @default(false)
+  alertaParto30Dias Boolean @default(false)
+  alertaParto15Dias Boolean @default(false)
 
-  pagamentos           Pagamento[]
+  pagamentos Pagamento[]
 
-  adminId              String
-  admin                User             @relation("AdminClientes", fields: [adminId], references: [id])
+  adminId String
+  admin   User   @relation("AdminClientes", fields: [adminId], references: [id])
 
-  createdAt            DateTime         @default(now())
+  createdAt DateTime @default(now())
 }
 
 model Pagamento {
-  id             String          @id @default(uuid())
-  clienteId      String
+  id        String  @id @default(uuid())
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [idCliente])
+
   valor          Float
   dataVencimento DateTime
   dataPagamento  DateTime?
@@ -56,23 +58,22 @@ model Pagamento {
   formaPagamento String?
   parcela        Int?
   totalParcelas  Int?
-  cliente        Cliente         @relation(fields: [clienteId], references: [idCliente])
 }
 
 model User {
-  id         String    @id @default(cuid())
-  name       String?
-  email      String    @unique
-  password   String
-  role       Role      @default(PARCEIRO)
+  id       String  @id @default(cuid())
+  name     String?
+  email    String  @unique
+  password String
+  role     Role    @default(PARCEIRO)
 
-  adminId    String?
-  admin      User?     @relation("AdminToPartners", fields: [adminId], references: [id])
-  parceiros  User[]    @relation("AdminToPartners")
+  adminId   String?
+  admin     User?   @relation("AdminToPartners", fields: [adminId], references: [id])
+  parceiros User[]  @relation("AdminToPartners")
 
-  clientes  Cliente[]  @relation("AdminClientes")
+  clientes Cliente[] @relation("AdminClientes")
 
-  createdAt DateTime   @default(now())
+  createdAt DateTime @default(now())
 }
 
 enum StatusCliente {
