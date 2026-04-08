@@ -1,12 +1,19 @@
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
+import { getAdminId } from "@/lib/getAdminId"
 import { calcularResumoAlertas } from "@/lib/alertaParto"
 
 export const dynamic = "force-dynamic"
 
+const adminId = await getAdminId()
+
 export default async function Dashboard() {
 
-  const clientes = await prisma.cliente.findMany()
+  const clientes = await prisma.cliente.findMany({
+    where: {
+      adminId: adminId,
+    }
+  })
 
   const resumoClientes = calcularResumoAlertas(clientes)
 
@@ -32,6 +39,9 @@ export default async function Dashboard() {
     // 🔴 Atrasados
     prisma.pagamento.count({
       where: {
+        cliente: {
+          adminId: adminId
+        },
         status: { not: "PAGO" },
         dataVencimento: { lt: hoje } // lt = less than
       }
@@ -40,6 +50,9 @@ export default async function Dashboard() {
     // 🟡 Pendentes
     prisma.pagamento.count({
       where: {
+        cliente: {
+          adminId: adminId,
+        },
         status: { not: "PAGO" },
         dataVencimento: { gte: hoje } // gte = greater than or equal
       }
@@ -48,6 +61,9 @@ export default async function Dashboard() {
     // 🟢 Pagos
     prisma.pagamento.count({
       where: {
+        cliente: {
+          adminId: adminId
+        },
         status: "PAGO"
       }
     }),
@@ -55,6 +71,7 @@ export default async function Dashboard() {
     // 🏥 Processos em Análise
     prisma.cliente.count({
       where: {
+        adminId: adminId,
         faseProcesso: "ANALISE_DOCUMENTOS"
       }
     }),
@@ -62,8 +79,8 @@ export default async function Dashboard() {
     // 📅 Partos nesta semana
     prisma.cliente.count({
       where: {
-        // gte = greater than or equal, lte = less than or equal
-        dataProvavelParto: { gte: inicioSemana, lte: fimSemana }
+        adminId: adminId,
+        dataProvavelParto: { gte: inicioSemana, lte: fimSemana } // gte = greater than or equal, lte = less than or equal
       }
     })
   ])
