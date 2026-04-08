@@ -5,8 +5,11 @@ import StatusFilter from "./[id]/components/StatusFilter"
 import FaseFilter from "./[id]/components/FaseFilter"
 import { getAlertaParto } from "@/lib/alertaParto"
 import { calcularResumoAlertas } from "@/lib/alertaParto"
+import { getAdminId } from "@/lib/getAdminId"
 
 export const dynamic = "force-dynamic"
+
+const adminId = await getAdminId()
 
 interface PageProps {
   searchParams: Promise<{
@@ -120,13 +123,16 @@ export default async function Clientes({ searchParams }: PageProps) {
   const totalClientes = await prisma.cliente.count({ where })
 
   const clientes = await prisma.cliente.findMany({
-    where,
-    orderBy: {
-      createdAt: "desc",
-    },
-    take: itensPorPagina,
-    skip,
-  })
+  where: {
+    ...where,
+    adminId: adminId,
+  },
+  orderBy: {
+    createdAt: "desc",
+  },
+  take: itensPorPagina,
+  skip,
+})
 
   const totalPaginas = Math.ceil(totalClientes / itensPorPagina)
   const todosClientes = await prisma.cliente.findMany({})
