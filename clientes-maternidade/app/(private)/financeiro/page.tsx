@@ -2,6 +2,9 @@ import { prisma } from "@/lib/prisma"
 import { Prisma } from "@prisma/client"
 import Link from "next/link"
 import { revalidatePath } from "next/cache"
+import { getAdminId } from "@/lib/getAdminId"
+
+const adminId = await getAdminId()
 
 async function marcarComoPago(formData: FormData) {
   "use server"
@@ -91,7 +94,12 @@ export default async function FinanceiroPage({
   }
 
   const pagamentos = await prisma.pagamento.findMany({
-    where,
+    where: {
+      ...where,
+      cliente: {
+        adminId: adminId
+      }
+    },
     include: {
       cliente: true
     },
