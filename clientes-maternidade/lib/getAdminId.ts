@@ -1,18 +1,22 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "./auth"
 
-export async function getAdminId() {
+export async function getAdminId(): Promise<string> {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
     throw new Error("Não autenticado")
   }
 
-  // Se for ADMIN → ele mesmo
+  // ADMIN → usa o próprio id
   if (session.user.role === "ADMIN") {
     return session.user.id
   }
 
-  // Se for PARCEIRO → retorna o admin dele
+  // PARCEIRO → precisa ter adminId
+  if (!session.user.adminId) {
+    throw new Error("Parceiro sem admin vinculado")
+  }
+
   return session.user.adminId
 }
