@@ -3,8 +3,6 @@ import Link from "next/link"
 import ExcluirCliente from "./components/BotaoExcluir"
 import { getAdminId } from "@/lib/getAdminId"
 
-const adminId = await getAdminId()
-
 type Props = {
   params: Promise<{ id: string }>
 }
@@ -12,7 +10,9 @@ type Props = {
 export default async function DetalheCliente({ params }: Props) {
   const { id } = await params
 
-  const cliente = await prisma.cliente.findUnique({
+  const adminId = await getAdminId()
+
+  const cliente = await prisma.cliente.findFirst({
     where: {
       idCliente: id,
       adminId: adminId,
