@@ -1,12 +1,28 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export async function POST(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const session = await getServerSession(authOptions)
 
+  if (!session?.user) {
+    return new Response("Não autorizado", { status: 401 })
+  }
+
+  const adminId =
+    session.user.role === "ADMIN"
+      ? session.user.id
+      : session.user.adminId
+
+  if (!adminId) {
+    return new Response("Admin não encontrado", { status: 400 })
+  }
+
+  const { id } = params
   const formData = await request.formData()
 
   const nomeCompleto = formData.get("nomeCompleto") as string
@@ -14,9 +30,10 @@ export async function POST(
   const telefone = formData.get("telefone") as string
   const email = formData.get("email") as string
 
-  await prisma.cliente.update({
+  await prisma.cliente.updateMany({
     where: {
       idCliente: id,
+      adminId: adminId,
     },
     data: {
       nomeCompleto,
@@ -33,13 +50,29 @@ export async function POST(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
-  const { id } = await params
+  const session = await getServerSession(authOptions)
 
-  await prisma.cliente.delete({
+  if (!session?.user) {
+    return new Response("Não autorizado", { status: 401 })
+  }
+
+  const adminId =
+    session.user.role === "ADMIN"
+      ? session.user.id
+      : session.user.adminId
+
+  if (!adminId) {
+    return new Response("Admin não encontrado", { status: 400 })
+  }
+
+  const { id } = params
+
+  await prisma.cliente.deleteMany({
     where: {
       idCliente: id,
+      adminId: adminId,
     },
   })
 
