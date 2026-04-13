@@ -1,39 +1,32 @@
 import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
-export async function POST(req: Request) {
-  const data = await req.json()
+export async function POST(request: Request) {
+  const session = await getServerSession(authOptions)
 
-  const cliente = await prisma.cliente.create({
+  if (!session?.user) {
+    return new Response("Não autorizado", { status: 401 })
+  }
+
+  const body = await request.json()
+
+  const adminId =
+    session.user.role === "ADMIN"
+      ? session.user.id
+      : session.user.adminId
+
+  if (!adminId) {
+    return new Response("Admin não encontrado", { status: 400 })
+  }
+
+  await prisma.cliente.create({
     data: {
-      nomeCompleto: data.nomeCompleto,
-      cpf: data.cpf,
-      telefone: data.telefone,
-      email: data.email || null,
-      instagram: data.instagram || null,
-      origemParceira: data.origemParceira || null,
-
-      recebeBolsaFamilia: data.recebeBolsaFamilia ?? false,
-
-      dataProvavelParto: data.dataProvavelParto
-        ? new Date(data.dataProvavelParto)
-        : null,
-
-      tempoGestacaoSemanas: data.tempoGestacaoSemanas || null,
-
-      possuiSenhaGov: data.possuiSenhaGov ?? false,
-      senhaGov: data.senhaGov || null,
-
-      statusCliente: data.statusCliente || "ATIVA",
-      faseProcesso: data.faseProcesso || "CADASTRO",
-      statusContrato: data.statusContrato || "NAO_ENVIADO",
-      statusNascimento: data.statusNascimento || "AGUARDANDO",
-
-      observacoes: data.observacoes || null,
-
+      ...body,
       dataCadastro: new Date(),
+      adminId: adminId,
     },
   })
 
-  return NextResponse.json(cliente)
+  return Response.json({ success: true })
 }
