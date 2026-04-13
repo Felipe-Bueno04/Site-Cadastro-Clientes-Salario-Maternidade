@@ -4,13 +4,14 @@ import ExcluirCliente from "./components/BotaoExcluir"
 import { getAdminId } from "@/lib/getAdminId"
 
 type Props = {
-  params: Promise<{ id: string }>
+  params: { id: string }
 }
 
 export default async function DetalheCliente({ params }: Props) {
-  const { id } = await params
-
+  
   const adminId = await getAdminId()
+
+  const { id } = params
 
   const cliente = await prisma.cliente.findFirst({
     where: {
