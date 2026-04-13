@@ -1,20 +1,24 @@
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { notFound } from "next/navigation"
+import { getAdminId } from "@/lib/getAdminId"
 
 interface Props {
-  params: Promise<{
-    id: string
-  }>
+  params: { id: string }
 }
 
 export default async function DetalhesPagamento({ params }: Props) {
 
-  const { id } = await params
+  const { id } = params
+  const adminId = await getAdminId()
 
-  const pagamento = await prisma.pagamento.findUnique({
+  const pagamento = await prisma.pagamento.findFirst({
     where: {
-      id: id
+      id: id,
+
+      cliente: {
+        adminId: adminId
+      }
     },
     include: {
       cliente: true
