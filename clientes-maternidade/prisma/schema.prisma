@@ -67,6 +67,8 @@ model User {
   password String
   role     Role    @default(PARCEIRO)
 
+  adminCode String? @unique
+
   adminId   String?
   admin     User?   @relation("AdminToPartners", fields: [adminId], references: [id])
   parceiros User[]  @relation("AdminToPartners")
