@@ -23,6 +23,7 @@ export async function POST(request: Request) {
   await prisma.cliente.create({
     data: {
       ...body,
+      dataProvavelParto: new Date(body.dataProvavelParto),
       dataCadastro: new Date(),
       adminId: adminId,
     },
