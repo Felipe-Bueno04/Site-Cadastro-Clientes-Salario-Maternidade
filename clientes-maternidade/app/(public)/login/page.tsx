@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 
 export default function LoginPage() {
   const { data: session } = useSession()
@@ -69,6 +70,15 @@ export default function LoginPage() {
         <button className="bg-black text-white p-2">
           Entrar
         </button>
+        <p className="text-sm text-center mt-4 text-gray-600">
+          Não tem uma conta?{" "}
+          <Link
+            href="/register"
+            className="text-blue-600 hover:text-blue-800 font-semibold transition"
+          >
+            Criar conta
+          </Link>
+        </p>
       </form>
     </div>
   )
