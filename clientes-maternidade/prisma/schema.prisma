@@ -15,7 +15,7 @@ model Cliente {
   telefone             String
   email                String?
   instagram            String?
-  origemParceira       String?
+  criadoPor            String?
   recebeBolsaFamilia   Boolean
   tempoGestacaoSemanas Int?
   dataProvavelParto    DateTime?
