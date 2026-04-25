@@ -1,5 +1,7 @@
 "use client"
 
+import { FormCard } from "@/components/FormCard"
+
 export default function CriarCliente() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -12,7 +14,6 @@ export default function CriarCliente() {
       telefone: (form.telefone as HTMLInputElement).value,
       email: (form.email as HTMLInputElement).value,
       instagram: (form.instagram as HTMLInputElement).value,
-      origemParceira: (form.origemParceira as HTMLInputElement).value,
       recebeBolsaFamilia:
         (form.recebeBolsaFamilia as HTMLSelectElement).value === "true",
       dataProvavelParto: (form.dataProvavelParto as HTMLInputElement).value,
@@ -41,71 +42,147 @@ export default function CriarCliente() {
   }
 
   return (
-    <div>
-      <h1>Nova Cliente</h1>
+    <FormCard>
+      <h1 className="text-2xl font-bold mb-6">
+        Nova Cliente
+      </h1>
 
-      <form onSubmit={handleSubmit}>
-        <h2>Dados pessoais</h2>
-        <input name="nomeCompleto" placeholder="Nome Completo" required />
-        <br />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-md">
+        
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Dados pessoais
+        </h2>
 
-        <input name="cpf" placeholder="CPF" required />
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Nome Completo</label>
+          <input 
+            name="nomeCompleto" 
+            placeholder="Nome Completo" 
+            required
+            className="border p-2" 
+          />
+        </div>
 
-        <input name="telefone" placeholder="Telefone" required />
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>CPF</label>
+          <input 
+            name="cpf" 
+            placeholder="CPF" 
+            required
+            className="border p-2" 
+          />
+        </div>
 
-        <input name="email" placeholder="Email" />
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Telefone</label>
+          <input 
+            name="telefone" 
+            placeholder="Telefone" 
+            required
+            className="border p-2" 
+          />
+        </div>
 
-        <input name="instagram" placeholder="Instagram" />
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Email</label>
+          <input 
+            name="email" 
+            placeholder="Email" 
+            required
+            className="border p-2" 
+          />
+        </div>
 
-        <input name="origemParceira" placeholder="Origem parceira" />
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Instagram</label>
+          <input 
+            name="instagram" 
+            placeholder="@perfil" 
+            className="border p-2" 
+          />
+        </div>
 
-        <label>Recebe Bolsa Família</label>
-        <select name="recebeBolsaFamilia">
-          <option value="false">Não</option>
-          <option value="true">Sim</option>
-        </select>
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Recebe Bolsa Família</label>
+          <select 
+            name="recebeBolsaFamilia"
+            className="border p-2"
+          >
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
 
-        <h2>Gestação</h2>
-        <label>Data provável do parto</label>
-        <input type="date" name="dataProvavelParto" />
-        <br />
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Gestação
+        </h2>
 
-        <input
-          name="tempoGestacaoSemanas"
-          placeholder="Semanas de gestação"
-          type="number"
-        />
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Data provável do parto</label>
+          <input 
+            type="date" 
+            name="dataProvavelParto"
+            className="border p-2"
+          />
+        </div>
 
-        <h2>Acesso GOV</h2>
-        <label>Possui senha GOV?</label>
-        <select name="possuiSenhaGov">
-          <option value="false">Não</option>
-          <option value="true">Sim</option>
-        </select>
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Semanas de gestação</label>
+          <input
+            name="tempoGestacaoSemanas"
+            placeholder="Semanas de gestação"
+            type="number"
+            className="border p-2"
+          />
+        </div>
 
-        <input name="senhaGov" placeholder="Senha GOV" />
-        <br />
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Acesso GOV
+        </h2>
 
-        <h2>Status do processo</h2>
-        <label>Status Cliente</label>
-        <select name="statusCliente">
-          <option value="ATIVA">Ativa</option>
-          <option value="INATIVA">Inativa</option>
-          <option value="FINALIZADA">Finalizada</option>
-          <option value="CANCELADA">Cancelada</option>
-        </select>
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Possui senha GOV?</label>
+          <select 
+            name="possuiSenhaGov"
+            className="border p-2"
+          >
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
 
-        <label>Fase Processo</label>
-          <select name="faseProcesso">
+        <div className="flex flex-col gap-1">
+          <label>Senha GOV</label>
+          <input 
+            name="senhaGov" 
+            placeholder="Senha GOV" 
+            className="border p-2"
+          />
+        </div>
+
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Status do processo
+        </h2>
+
+        <div className="flex flex-col gap-1">
+          <label>Status Cliente</label>
+          <select 
+            name="statusCliente"
+            className="border p-2"
+          >
+            <option value="ATIVA">Ativa</option>
+            <option value="INATIVA">Inativa</option>
+            <option value="FINALIZADA">Finalizada</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label>Fase Processo</label>
+          <select 
+            name="faseProcesso"
+            className="border p-2"
+          >
             <option value="CADASTRO">Cadastro</option>
             <option value="ANALISE_DOCUMENTOS">Análise documentos</option>
             <option value="CONTRATO_ENVIADO">Contrato enviado</option>
@@ -113,32 +190,52 @@ export default function CriarCliente() {
             <option value="PROCESSO_ENVIADO_INSS">Processo enviado ao INSS</option>
             <option value="PROCESSO_FINALIZADO">Processo finalizado</option>
           </select>
-        <br />
+        </div>
 
-        <label>Status Contrato</label>
-        <select name="statusContrato">
-          <option value="NAO_ENVIADO">Não enviado</option>
-          <option value="ENVIADO">Enviado</option>
-          <option value="ASSINADO">Assinado</option>
-          <option value="CANCELADO">Cancelado</option>
-        </select>
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Status Contrato</label>
+          <select 
+            name="statusContrato"
+            className="border p-2"
+          >
+            <option value="NAO_ENVIADO">Não enviado</option>
+            <option value="ENVIADO">Enviado</option>
+            <option value="ASSINADO">Assinado</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
 
-        <label>Status Nascimento</label>
-        <select name="statusNascimento">
-          <option value="AGUARDANDO">Aguardando</option>
-          <option value="NASCEU">Nasceu</option>
-          <option value="NAO_INFORMADO">Não informado</option>
-        </select>
-        <br />
+        <div className="flex flex-col gap-1">
+          <label>Status Nascimento</label>
+          <select 
+            name="statusNascimento"
+            className="border p-2"
+          >
+            <option value="AGUARDANDO">Aguardando</option>
+            <option value="NASCEU">Nasceu</option>
+            <option value="NAO_INFORMADO">Não informado</option>
+          </select>
+        </div>
 
-        <h2>Observações</h2>
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Observações
+        </h2>
         
-        <textarea name="observacoes" rows={4} />
-        <br />
+        <div className="flex flex-col gap-1">
+          <textarea 
+            name="observacoes" 
+            rows={4} 
+            className="border p-2"
+          />
+        </div>
 
-        <button type="submit">Salvar</button>
+        <button 
+          type="submit"
+          className="bg-blue-600 text-white p-2 rounded"  
+        >
+          Salvar cliente
+        </button>
       </form>
-    </div>
+    </FormCard>
   )
 }

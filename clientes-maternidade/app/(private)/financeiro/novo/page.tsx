@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import { FormCard } from "@/components/FormCard"
 
 async function criarPagamento(formData: FormData) {
   "use server"
@@ -32,67 +33,69 @@ export default async function NovoPagamentoPage() {
   })
 
   return (
-    <div className="p-6">
+    <FormCard>
+        <h1 className="text-2xl font-bold mb-6">
+          Novo Pagamento
+        </h1>
 
-      <h1 className="text-2xl font-bold mb-6">
-        Novo Pagamento
-      </h1>
-
-      <form action={criarPagamento} className="flex flex-col gap-4 max-w-md">
-
-        <label>
-          Cliente
-        </label>
-
-        <select
-          name="clienteId"
-          required
-          className="border p-2"
-        >
-          <option value="">Selecione um cliente</option>
-
-          {clientes.map((cliente) => (
-            <option
-              key={cliente.idCliente}
-              value={cliente.idCliente}
+        <form action={criarPagamento} className="flex flex-col gap-4 max-w-md">
+          
+          <div className="flex flex-col gap-1">
+            <label>Cliente</label>            
+            <select
+              name="clienteId"
+              required
+              className="border p-2"
+              defaultValue="Selecione um cliente"
             >
-              {cliente.nomeCompleto}
-            </option>
-          ))}
-        </select>
+              <option
+                disabled
+                hidden
+              >
+                Selecione um cliente
+              </option>
 
-        <label>
-          Valor
-        </label>
+              {clientes.map((cliente) => (
+                <option
+                  key={cliente.idCliente}
+                  value={cliente.idCliente}
+                >
+                  {cliente.nomeCompleto}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <label>Valor</label>
+            <input
+              type="number"
+              name="valor"
+              placeholder="R$ 0.00"
+              step="0.01"
+              required
+              className="border p-2"
+            />
+          </div>
+          
+          <div className="flex flex-col gap-1">
+            <label>Data de vencimento</label>
+            <input
+              type="date"
+              name="dataVencimento"
+              required
+              className="border p-2"
+            />
+          </div>
 
-        <input
-          type="number"
-          name="valor"
-          step="0.01"
-          required
-          className="border p-2"
-        />
+          <button
+            type="submit"
+            className="bg-blue-600 text-white p-2 rounded"
+          >
+            Salvar pagamento
+          </button>
 
-        <label>
-          Data de vencimento
-        </label>
-
-        <input
-          type="date"
-          name="dataVencimento"
-          required
-          className="border p-2"
-        />
-
-        <button
-          type="submit"
-          className="bg-blue-600 text-white p-2 rounded"
-        >
-          Salvar pagamento
-        </button>
-
-      </form>
-
-    </div>
+        </form>
+      </FormCard>
   )
 }
