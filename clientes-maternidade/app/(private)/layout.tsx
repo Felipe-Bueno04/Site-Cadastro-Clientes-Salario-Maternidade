@@ -10,15 +10,33 @@ export default async function PrivateLayout({
 }) {
   const session = await getServerSession(authOptions)
 
-  if (!session) {
+  if (!session?.user) {
     redirect("/login")
   }
 
+  const firstName = session.user.name?.split(" ")[0] || "Usuário"
+  const email = session.user.email || ""
+
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
+    <div className="flex min-h-screen">
       <Sidebar />
-      <main style={{ flex: 1, padding: "20px" }}>
-        {children}
+
+      <main className="flex-1">
+        <div className="border-b border-gray-200 bg-white px-8 py-5">
+          <div>
+            <p className="text-base font-semibold text-gray-900">
+              {firstName}
+            </p>
+
+            <p className="text-sm text-gray-500">
+              {email}
+            </p>
+          </div>
+        </div>
+
+        <div className="p-8">
+          {children}
+        </div>
       </main>
     </div>
   )
