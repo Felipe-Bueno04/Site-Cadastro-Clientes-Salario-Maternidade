@@ -92,7 +92,7 @@ export default function RegisterPage() {
                     type="submit"
                     className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
                 >
-                    Cadastar
+                    Cadastrar
                 </button>
             </form>
         </div>
