@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma"
 import { redirect, notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import { getAdminId } from "@/lib/getAdminId"
 
 interface Props {
   params: Promise<{
@@ -23,6 +24,20 @@ async function atualizarPagamento(formData: FormData) {
 
   const formaPagamento = formData.get("formaPagamento") as string
   const status = formData.get("status") as any
+
+  const adminId = await getAdminId()
+  const pagamento = await prisma.pagamento.findFirst({
+    where: {
+      id,
+      cliente: {
+        adminId: adminId
+      }
+    }
+  })
+
+  if (!pagamento) {
+    notFound()
+  }
 
   await prisma.pagamento.update({
     where: { id },
@@ -49,11 +64,18 @@ async function atualizarPagamento(formData: FormData) {
 export default async function EditarPagamento({ params }: Props) {
 
   const { id } = await params
+  const adminId = await getAdminId()
 
-  const pagamento = await prisma.pagamento.findUnique({
-
-    where: { id: id },
-    include: { cliente: true }
+  const pagamento = await prisma.pagamento.findFirst({
+    where: { 
+      id: id,
+      cliente: {
+        adminId: adminId
+      } 
+    },
+    include: { 
+      cliente: true 
+    }
   })
 
   if (!pagamento) {
