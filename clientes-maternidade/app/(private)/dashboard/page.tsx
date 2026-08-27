@@ -2,12 +2,14 @@ import { prisma } from "@/lib/prisma"
 import Link from "next/link"
 import { getAdminId } from "@/lib/getAdminId"
 import { calcularResumoAlertas } from "@/lib/alertaParto"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
 
-const adminId = await getAdminId()
-
 export default async function Dashboard() {
+  const session = await getServerSession(authOptions)
+  const adminId = await getAdminId()
 
   const clientes = await prisma.cliente.findMany({
     where: {
@@ -28,62 +30,49 @@ export default async function Dashboard() {
   fimSemana.setDate(inicioSemana.getDate() + 7)
   fimSemana.setHours(23,59,59,999)
 
-  const [
-    totalAtrasados,
-    totalPendentes,
-    totalPagos,
-    totalProcessosAnalise,
-    totalPartosSemana
-  ] = await Promise.all([
-
+  const totalAtrasados = await prisma.pagamento.count({
     // 🔴 Atrasados
-    prisma.pagamento.count({
-      where: {
-        cliente: {
-          adminId: adminId
-        },
-        status: { not: "PAGO" },
-        dataVencimento: { lt: hoje } // lt = less than
-      }
-    }),
-
+    where: {
+      cliente: {
+        adminId: adminId
+      },
+      status: { not: "PAGO" },
+      dataVencimento: { lt: hoje } // lt = less than
+    }
+  }) 
+  const totalPendentes = await prisma.pagamento.count({
     // 🟡 Pendentes
-    prisma.pagamento.count({
-      where: {
-        cliente: {
-          adminId: adminId,
-        },
-        status: { not: "PAGO" },
-        dataVencimento: { gte: hoje } // gte = greater than or equal
-      }
-    }),
-
+    where: {
+      cliente: {
+        adminId: adminId,
+      },
+      status: { not: "PAGO" },
+      dataVencimento: { gte: hoje } // gte = greater than or equal
+    }
+  })
+  const totalPagos = await prisma.pagamento.count({
     // 🟢 Pagos
-    prisma.pagamento.count({
-      where: {
-        cliente: {
-          adminId: adminId
-        },
-        status: "PAGO"
-      }
-    }),
-
+    where: {
+      cliente: {
+        adminId: adminId
+      },
+      status: "PAGO"
+    }
+  })
+  const totalProcessosAnalise = await prisma.cliente.count({
     // 🏥 Processos em Análise
-    prisma.cliente.count({
-      where: {
-        adminId: adminId,
-        faseProcesso: "ANALISE_DOCUMENTOS"
-      }
-    }),
-
+    where: {
+      adminId: adminId,
+      faseProcesso: "ANALISE_DOCUMENTOS"
+    }
+  })
+  const totalPartosSemana = await prisma.cliente.count({
     // 📅 Partos nesta semana
-    prisma.cliente.count({
-      where: {
-        adminId: adminId,
-        dataProvavelParto: { gte: inicioSemana, lte: fimSemana } // gte = greater than or equal, lte = less than or equal
-      }
-    })
-  ])
+    where: {
+      adminId: adminId,
+      dataProvavelParto: { gte: inicioSemana, lte: fimSemana } // gte = greater than or equal, lte = less than or equal
+    }
+  })
 
   const cardStyle = {
     padding: "16px 20px",
@@ -147,35 +136,37 @@ export default async function Dashboard() {
 
       {/* FINANCEIRO */}
 
-      <h2 style={{ marginTop: "40px" }}>
-        Alertas Financeiros
-      </h2>
+      {session?.user?.role === "ADMIN" && (
+        <>
+          <h2 style={{ marginTop: "40px" }}>
+          Alertas Financeiros
+        </h2>
 
-      <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
 
-        <Link
-          href="/financeiro?alerta=atrasados"
-          style={{ ...cardStyle, background: "#fecaca" }}
-        >
-          ⚠️ {totalAtrasados} pagamentos atrasados
-        </Link>
+          <Link
+            href="/financeiro?alerta=atrasados"
+            style={{ ...cardStyle, background: "#fecaca" }}
+          >
+            ⚠️ {totalAtrasados} pagamentos atrasados
+          </Link>
 
-        <Link
-          href="/financeiro?alerta=pendentes"
-          style={{ ...cardStyle, background: "#fef9c3" }}
-        >
-          🟡 {totalPendentes} pagamentos pendentes
-        </Link>
+          <Link
+            href="/financeiro?alerta=pendentes"
+            style={{ ...cardStyle, background: "#fef9c3" }}
+          >
+            🟡 {totalPendentes} pagamentos pendentes
+          </Link>
 
-        <Link
-          href="/financeiro?status=PAGO"
-          style={{ ...cardStyle, background: "#dcfce7" }}
-        >
-          🟢 {totalPagos} pagamentos pagos
-        </Link>
-
+          <Link
+            href="/financeiro?status=PAGO"
+            style={{ ...cardStyle, background: "#dcfce7" }}
+          >
+            🟢 {totalPagos} pagamentos pagos
+          </Link>
       </div>
-
+        </>
+      )}
     </div>
   )
 }
