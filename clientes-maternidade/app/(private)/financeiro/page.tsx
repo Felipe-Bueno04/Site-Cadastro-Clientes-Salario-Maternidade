@@ -4,8 +4,6 @@ import Link from "next/link"
 import { revalidatePath } from "next/cache"
 import { getAdminId } from "@/lib/getAdminId"
 
-const adminId = await getAdminId()
-
 async function marcarComoPago(formData: FormData) {
   "use server"
 
@@ -33,6 +31,7 @@ export default async function FinanceiroPage({
     alerta?: string
   }>
 }) {
+  const adminId = await getAdminId()
 
   const params = await searchParams
   
