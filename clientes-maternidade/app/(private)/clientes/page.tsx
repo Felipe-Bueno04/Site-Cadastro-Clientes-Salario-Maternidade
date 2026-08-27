@@ -9,8 +9,6 @@ import { getAdminId } from "@/lib/getAdminId"
 
 export const dynamic = "force-dynamic"
 
-const adminId = await getAdminId()
-
 interface PageProps {
   searchParams: Promise<{
     busca?: string
@@ -22,6 +20,8 @@ interface PageProps {
 }
 
 export default async function Clientes({ searchParams }: PageProps) {
+  const adminId = await getAdminId()
+  
   const params = await searchParams
 
   const busca = params?.busca
@@ -35,6 +35,8 @@ export default async function Clientes({ searchParams }: PageProps) {
   const skip = (paginaAtual - 1) * itensPorPagina
 
   const where: Prisma.ClienteWhereInput = {
+    adminId: adminId,
+
     ...(busca && {
       OR: [
         {
@@ -124,7 +126,6 @@ export default async function Clientes({ searchParams }: PageProps) {
 
   const clientes = await prisma.cliente.findMany({
   where: {
-    ...where,
     adminId: adminId,
   },
   orderBy: {
@@ -135,7 +136,11 @@ export default async function Clientes({ searchParams }: PageProps) {
 })
 
   const totalPaginas = Math.ceil(totalClientes / itensPorPagina)
-  const todosClientes = await prisma.cliente.findMany({})
+  const todosClientes = await prisma.cliente.findMany({
+    where: {
+      adminId: adminId,
+    },
+  })
   const resumo = calcularResumoAlertas(todosClientes)
 
   function gerarLinkPagina(p: number) {
