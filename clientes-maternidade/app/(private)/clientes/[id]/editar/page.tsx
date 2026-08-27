@@ -8,6 +8,9 @@ import {
   StatusNascimento,
 } from "@prisma/client"
 import { notFound } from "next/navigation"
+import { getAdminId } from "@/lib/getAdminId"
+
+export const dynamic = "force-dynamic"
 
 interface Props {
   params: Promise<{ id: string }>
@@ -17,6 +20,18 @@ async function atualizarCliente(formData: FormData) {
   "use server"
 
   const id = formData.get("id") as string
+  const adminId = await getAdminId()
+
+  const cliente = await prisma.cliente.findFirst({
+    where: {
+      idCliente: id,
+      adminId: adminId,
+    },
+  })
+
+  if (!cliente) {
+    notFound()
+  }
 
   await prisma.cliente.update({
     where: { idCliente: id },
@@ -26,7 +41,7 @@ async function atualizarCliente(formData: FormData) {
       telefone: formData.get("telefone") as string,
       email: (formData.get("email") as string) || null,
       instagram: (formData.get("instagram") as string) || null,
-      origemParceira: (formData.get("origemParceira") as string) || null,
+      criadoPor: (formData.get("origemParceira") as string) || null,
 
       recebeBolsaFamilia:
         (formData.get("recebeBolsaFamilia") as string) === "true",
@@ -58,10 +73,12 @@ async function atualizarCliente(formData: FormData) {
 
 export default async function EditarCliente({ params }: Props) {
   const { id } = await params
+  const adminId = await getAdminId()
 
-  const cliente = await prisma.cliente.findUnique({
+  const cliente = await prisma.cliente.findFirst({
     where: {
       idCliente: id,
+      adminId: adminId,
     },
   })
 
@@ -104,7 +121,7 @@ export default async function EditarCliente({ params }: Props) {
         <input name="instagram" defaultValue={cliente.instagram ?? ""} />
 
         <label>Origem parceira</label>
-        <input name="origemParceira" defaultValue={cliente.origemParceira ?? ""} />
+        <input name="origemParceira" defaultValue={cliente.criadoPor ?? ""} />
 
         <label>Recebe Bolsa Família</label>
         <select
