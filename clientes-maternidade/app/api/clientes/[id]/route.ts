@@ -49,30 +49,45 @@ export async function POST(
 }
 
 export async function DELETE(
-  request: Request,
+  req: Request,
   { params }: { params: { id: string } }
 ) {
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
-    return new Response("Não autorizado", { status: 401 })
+    return new Response("Não autorizado!", { status: 401 })
   }
 
   const adminId =
     session.user.role === "ADMIN"
       ? session.user.id
       : session.user.adminId
-
+  
   if (!adminId) {
-    return new Response("Admin não encontrado", { status: 400 })
+    return new Response("Admin não encontrado!", { status: 400 })
   }
 
-  const { id } = params
+  const { id } = await params
 
-  await prisma.cliente.deleteMany({
+  if(!id) {
+    return new Response("ID inválido!", { status: 400 })
+  }
+
+  // Valida se o cliente pertence ao admin
+  const cliente = await prisma.cliente.findFirst({
     where: {
       idCliente: id,
       adminId: adminId,
+    },
+  })
+
+  if(!cliente) {
+    return new Response("Cliente não encontrado!", { status: 404 })
+  }
+
+  await prisma.cliente.delete({
+    where: {
+      idCliente: id,
     },
   })
 
