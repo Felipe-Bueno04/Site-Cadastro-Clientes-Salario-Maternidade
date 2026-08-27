@@ -3,6 +3,9 @@ import Link from "next/link"
 import ExcluirCliente from "./components/BotaoExcluir"
 import { getAdminId } from "@/lib/getAdminId"
 
+export const dynamic = "force-dynamic"
+export const revalidate = 0
+
 type Props = {
   params: { id: string }
 }
@@ -11,7 +14,7 @@ export default async function DetalheCliente({ params }: Props) {
   
   const adminId = await getAdminId()
 
-  const { id } = params
+  const { id } = await params
 
   const cliente = await prisma.cliente.findFirst({
     where: {
