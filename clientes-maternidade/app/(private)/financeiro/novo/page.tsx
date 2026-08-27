@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { redirect } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { FormCard } from "@/components/FormCard"
+import { getAdminId } from "@/lib/getAdminId"
 
 async function criarPagamento(formData: FormData) {
   "use server"
@@ -9,6 +10,19 @@ async function criarPagamento(formData: FormData) {
   const clienteId = formData.get("clienteId") as string
   const valor = Number(formData.get("valor"))
   const dataVencimento = formData.get("dataVencimento") as string
+
+  const adminId = await getAdminId()
+
+  const cliente = await prisma.cliente.findFirst({
+    where: {
+      idCliente: clienteId,
+      adminId: adminId,
+    }
+  })
+
+  if(!cliente) {
+    throw new Error("Cliente não pertence a este usuário!")
+  }
 
   await prisma.pagamento.create({
     data: {
@@ -25,8 +39,12 @@ async function criarPagamento(formData: FormData) {
 }
 
 export default async function NovoPagamentoPage() {
+  const adminId = await getAdminId()
 
   const clientes = await prisma.cliente.findMany({
+    where: {
+      adminId: adminId,
+    },
     orderBy: {
       nomeCompleto: "asc"
     }
