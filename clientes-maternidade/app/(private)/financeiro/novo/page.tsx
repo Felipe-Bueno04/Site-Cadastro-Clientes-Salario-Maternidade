@@ -55,7 +55,7 @@ export default async function NovoPagamentoPage() {
         <h1 className="text-2xl font-bold mb-6">
           Novo Pagamento
         </h1>
-
+        
         <form action={criarPagamento} className="flex flex-col gap-4 max-w-md">
           
           <div className="flex flex-col gap-1">
@@ -63,7 +63,7 @@ export default async function NovoPagamentoPage() {
             <select
               name="clienteId"
               required
-              className="border p-2"
+              className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
               defaultValue="Selecione um cliente"
             >
               <option
@@ -92,7 +92,7 @@ export default async function NovoPagamentoPage() {
               placeholder="R$ 0.00"
               step="0.01"
               required
-              className="border p-2"
+              className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
@@ -102,13 +102,13 @@ export default async function NovoPagamentoPage() {
               type="date"
               name="dataVencimento"
               required
-              className="border p-2"
+              className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <button
             type="submit"
-            className="bg-blue-600 text-white p-2 rounded"
+            className="bg-blue-600 text-white font-medium p-2.5 rounded-lg hover:bg-blue-700 transition"
           >
             Salvar pagamento
           </button>

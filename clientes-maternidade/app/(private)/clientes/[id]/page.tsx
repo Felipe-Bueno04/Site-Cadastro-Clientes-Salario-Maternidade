@@ -53,17 +53,37 @@ export default async function DetalheCliente({ params }: Props) {
         <strong>Fase:</strong> {cliente.faseProcesso}
       </div>
 
-      <div style={{ display: "flex", gap: "10px" }}>
-        <Link href={`/clientes/${cliente.idCliente}/editar`}>
-          <button>Editar</button>
-        </Link>
-        
-        <ExcluirCliente id={cliente.idCliente} />
+      <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+          <Link href={`/clientes/${cliente.idCliente}/editar`}>
+            <button
+              style={{
+                backgroundColor: "#d1c7c7",
+                color: "black",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "none",
+              }}
+            >
+              Editar
+            </button>
+          </Link>
+          
+          <ExcluirCliente id={cliente.idCliente} />
 
-        <Link href="/clientes">
-          <button>Voltar</button>
-        </Link>
-      </div>
+          <Link href="/clientes">
+            <button
+              style={{
+                backgroundColor: "#d1c7c7",
+                color: "black",
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "none",
+              }}
+            >
+              Voltar
+            </button>
+          </Link>
+        </div>
     </div>
   )
 }

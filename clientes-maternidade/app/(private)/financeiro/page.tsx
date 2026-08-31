@@ -3,20 +3,36 @@ import { Prisma } from "@prisma/client"
 import Link from "next/link"
 import { revalidatePath } from "next/cache"
 import { getAdminId } from "@/lib/getAdminId"
+import { notFound } from "next/navigation"
 
 async function marcarComoPago(formData: FormData) {
   "use server"
 
   const pagamentoId = formData.get("pagamentoId") as string
+  
+  const adminId = await getAdminId()
+
+  const pagamento = await prisma.pagamento.findFirst({
+    where: {
+      id: pagamentoId,
+      cliente: {
+        adminId: adminId
+      },
+    },
+  })
+
+  if (!pagamento) {
+    notFound()
+  }
 
   await prisma.pagamento.update({
     where: {
-      id: pagamentoId
+      id: pagamentoId,
     },
     data: {
       status: "PAGO",
-      dataPagamento: new Date()
-    }
+      dataPagamento: new Date(),
+    },
   })
 
   revalidatePath("/financeiro")
@@ -65,11 +81,9 @@ export default async function FinanceiroPage({
   }
 
   if (alerta === "atrasados") {
-
     where.status = {
-      not: "PAGO"
+      not: "PAGO",
     }
-
     where.dataVencimento = {
       // lt = less than 
       lt: hoje
@@ -77,11 +91,9 @@ export default async function FinanceiroPage({
   }
 
   if (alerta === "pendentes") {
-
     where.status = {
       not: "PAGO"
     }
-
     where.dataVencimento = {
       // gte = greater than or equal
       gte: hoje

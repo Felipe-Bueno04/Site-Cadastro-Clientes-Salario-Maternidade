@@ -1,3 +1,5 @@
+import Link from "next/link"
+
 import { prisma } from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
@@ -9,6 +11,7 @@ import {
 } from "@prisma/client"
 import { notFound } from "next/navigation"
 import { getAdminId } from "@/lib/getAdminId"
+import { FormCard } from "@/components/FormCard"
 
 export const dynamic = "force-dynamic"
 
@@ -87,136 +90,234 @@ export default async function EditarCliente({ params }: Props) {
   }
 
   return (
-    <div style={{ padding: "40px" }}>
-      <h1 style={{ fontSize: "26px", marginBottom: "20px" }}>
+    <FormCard>
+      <h1 className="text-2xl font-bold mb-6">
         Editar Cliente
       </h1>
 
       <form
         action={atualizarCliente}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
-          maxWidth: "500px",
-        }}
+        className="flex flex-col gap-4 max-w-md"
       >
         <input type="hidden" name="id" value={cliente.idCliente} />
 
-        <h3>Dados pessoais</h3>
+        <h2 className="text-base font-semibold mt-4 mb-2">Dados pessoais</h2>
 
-        <label>Nome Completo</label>
-        <input name="nomeCompleto" defaultValue={cliente.nomeCompleto} required />
+        <div className="flex flex-col gap-1">
+          <label>Nome Completo</label>
+          <input 
+            name="nomeCompleto" 
+            placeholder="Nome Completo"
+            defaultValue={cliente.nomeCompleto} 
+            required
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>CPF</label>
-        <input name="cpf" defaultValue={cliente.cpf} required />
+        <div className="flex flex-col gap-1">
+          <label>CPF</label>
+          <input 
+            name="cpf"
+            defaultValue={cliente.cpf}
+            placeholder="CPF" 
+            required
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
+          />
+        </div>
 
-        <label>Telefone</label>
-        <input name="telefone" defaultValue={cliente.telefone} required />
+        <div className="flex flex-col gap-1">
+          <label>Telefone</label>
+          <input 
+            name="telefone"
+            defaultValue={cliente.telefone}
+            placeholder="Telefone" 
+            required
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
+          />
+        </div>
 
-        <label>Email</label>
-        <input name="email" defaultValue={cliente.email ?? ""} />
+        <div className="flex flex-col gap-1">
+          <label>Email</label>
+          <input 
+            name="email"
+            defaultValue={cliente.email ?? ""} 
+            placeholder="Email" 
+            required
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
+          />
+        </div>
 
-        <label>Instagram</label>
-        <input name="instagram" defaultValue={cliente.instagram ?? ""} />
+        <div className="flex flex-col gap-1">
+          <label>Instagram</label>
+          <input 
+            name="instagram"
+            defaultValue={cliente.instagram ?? ""} 
+            placeholder="@perfil" 
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
+          />
+        </div>
 
-        <label>Origem parceira</label>
-        <input name="origemParceira" defaultValue={cliente.criadoPor ?? ""} />
+        <div className="flex flex-col gap-1">
+          <label>Recebe Bolsa Família</label>
+          <select 
+            name="recebeBolsaFamilia"
+            defaultValue={String(cliente.recebeBolsaFamilia)}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
 
-        <label>Recebe Bolsa Família</label>
-        <select
-          name="recebeBolsaFamilia"
-          defaultValue={String(cliente.recebeBolsaFamilia)}
-        >
-          <option value="false">Não</option>
-          <option value="true">Sim</option>
-        </select>
+        <h2 className="text-base font-semibold mt-4 mb-2">Gestação</h2>
 
-        <h3>Gestação</h3>
+        <div className="flex flex-col gap-1">
+          <label>Data provável do parto</label>
+          <input 
+            type="date" 
+            name="dataProvavelParto"
+            defaultValue={
+              cliente.dataProvavelParto
+                ? cliente.dataProvavelParto.toISOString().split("T")[0]
+                : ""
+            }
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"            
+          />
+        </div>
+        
+        <div className="flex flex-col gap-1">
+          <label>Semanas de gestação</label>
+          <input
+            name="tempoGestacaoSemanas"
+            defaultValue={cliente.tempoGestacaoSemanas ?? ""}
+            placeholder="Semanas de gestação"
+            type="number"
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"            
+          />
+        </div>
 
-        <label>Data provável do parto</label>
-        <input
-          type="date"
-          name="dataProvavelParto"
-          defaultValue={
-            cliente.dataProvavelParto
-              ? cliente.dataProvavelParto.toISOString().split("T")[0]
-              : ""
-          }
-        />
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Acesso GOV
+        </h2>
+        
+        <div className="flex flex-col gap-1">
+          <label>Possui senha GOV?</label>
+          <select 
+            name="possuiSenhaGov"
+            defaultValue={String(cliente.possuiSenhaGov)}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="false">Não</option>
+            <option value="true">Sim</option>
+          </select>
+        </div>
+        
+        <div className="flex flex-col gap-1">
+          <label>Senha GOV</label>
+          <input 
+            name="senhaGov"
+            defaultValue={cliente.senhaGov ?? ""}
+            placeholder="Senha GOV" 
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Semanas de gestação</label>
-        <input
-          type="number"
-          name="tempoGestacaoSemanas"
-          defaultValue={cliente.tempoGestacaoSemanas ?? ""}
-        />
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Status do processo
+        </h2>
+        
+        <div className="flex flex-col gap-1">
+          <label>Status Cliente</label>
+          <select 
+            name="statusCliente"
+            defaultValue={cliente.statusCliente}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="ATIVA">Ativa</option>
+            <option value="INATIVA">Inativa</option>
+            <option value="FINALIZADA">Finalizada</option>
+            <option value="CANCELADA">Cancelada</option>
+          </select>
+        </div>
+        
+        <div className="flex flex-col gap-1">
+          <label>Fase Processo</label>
+          <select 
+            name="faseProcesso"
+            defaultValue={cliente.faseProcesso}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="CADASTRO">Cadastro</option>
+            <option value="ANALISE_DOCUMENTOS">Análise documentos</option>
+            <option value="CONTRATO_ENVIADO">Contrato enviado</option>
+            <option value="AGUARDANDO_ASSINATURA">Aguardando assinatura</option>
+            <option value="PROCESSO_ENVIADO_INSS">Processo enviado ao INSS</option>
+            <option value="PROCESSO_FINALIZADO">Processo finalizado</option>
+          </select>
+        </div>
+        
+        <div className="flex flex-col gap-1">
+          <label>Status Contrato</label>
+          <select 
+            name="statusContrato"
+            defaultValue={cliente.statusContrato}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+            >
+            <option value="NAO_ENVIADO">Não enviado</option>
+            <option value="ENVIADO">Enviado</option>
+            <option value="ASSINADO">Assinado</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
+        
+        <div className="flex flex-col gap-1">
+          <label>Status Nascimento</label>
+          <select 
+            name="statusNascimento"
+            defaultValue={cliente.statusNascimento}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="AGUARDANDO">Aguardando</option>
+            <option value="NASCEU">Nasceu</option>
+            <option value="NAO_INFORMADO">Não informado</option>
+          </select>
+        </div>
 
-        <h3>Acesso GOV</h3>
+        <h2 className="text-base font-semibold mt-4 mb-2">
+          Observações
+        </h2>
+        
+        <div className="flex flex-col gap-1">
+          <textarea 
+            name="observacoes" 
+            rows={4}
+            defaultValue={cliente.observacoes ?? ""}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Possui senha GOV?</label>
-        <select
-          name="possuiSenhaGov"
-          defaultValue={String(cliente.possuiSenhaGov)}
-        >
-          <option value="false">Não</option>
-          <option value="true">Sim</option>
-        </select>
-
-        <label>Senha GOV</label>
-        <input name="senhaGov" defaultValue={cliente.senhaGov ?? ""} />
-
-        <h3>Status do processo</h3>
-
-        <label>Status Cliente</label>
-        <select name="statusCliente" defaultValue={cliente.statusCliente}>
-          <option value="ATIVA">ATIVA</option>
-          <option value="INATIVA">INATIVA</option>
-          <option value="FINALIZADA">FINALIZADA</option>
-          <option value="CANCELADA">CANCELADA</option>
-        </select>
-
-        <label>Fase Processo</label>
-        <select name="faseProcesso" defaultValue={cliente.faseProcesso}>
-          <option value="CADASTRO">Cadastro</option>
-          <option value="ANALISE_DOCUMENTOS">Análise documentos</option>
-          <option value="CONTRATO_ENVIADO">Contrato enviado</option>
-          <option value="AGUARDANDO_ASSINATURA">Aguardando assinatura</option>
-          <option value="PROCESSO_ENVIADO_INSS">Processo enviado ao INSS</option>
-          <option value="PROCESSO_FINALIZADO">Processo finalizado</option>
-        </select>
-
-        <label>Status Contrato</label>
-        <select name="statusContrato" defaultValue={cliente.statusContrato}>
-          <option value="NAO_ENVIADO">Não enviado</option>
-          <option value="ENVIADO">Enviado</option>
-          <option value="ASSINADO">Assinado</option>
-          <option value="CANCELADO">Cancelado</option>
-        </select>
-
-        <label>Status Nascimento</label>
-        <select name="statusNascimento" defaultValue={cliente.statusNascimento}>
-          <option value="AGUARDANDO">Aguardando</option>
-          <option value="NASCEU">Nasceu</option>
-          <option value="NAO_INFORMADO">Não informado</option>
-        </select>
-
-        <h3>Observações</h3>
-
-        <textarea
-          name="observacoes"
-          rows={4}
-          defaultValue={cliente.observacoes ?? ""}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Cadastrado por: {cliente.criadoPor ?? ""}</label>
+        </div>
 
         <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
-          <button type="submit">Salvar Alterações</button>
+          <button 
+            type="submit"
+            className="bg-blue-600 text-white p-2 rounded"
+          >
+            Salvar Alterações
+          </button>
 
-          <a href={`/clientes/${cliente.idCliente}`}>
-            <button type="button">Cancelar</button>
-          </a>
+          <Link href={`/clientes/${cliente.idCliente}`}>
+            <button 
+            type="submit"
+            className="bg-red-600 text-white p-2 rounded"
+          >
+            Cancelar
+          </button>
+          </Link>
         </div>
       </form>
-    </div>
+    </FormCard>
   )
 }

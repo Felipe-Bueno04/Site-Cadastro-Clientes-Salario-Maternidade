@@ -1,7 +1,10 @@
+import Link from "next/link"
+
 import { prisma } from "@/lib/prisma"
 import { redirect, notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
 import { getAdminId } from "@/lib/getAdminId"
+import { FormCard } from "@/components/FormCard"
 
 interface Props {
   params: Promise<{
@@ -91,96 +94,122 @@ export default async function EditarPagamento({ params }: Props) {
     : ""
 
   return (
-    <div style={{ padding: "40px", fontFamily: "Inter, sans-serif" }}>
+    <FormCard>
 
-      <h1 style={{ fontSize: "28px", fontWeight: 600 }}>
+      <h1 className="text-2xl font-bold mb-6">
         Editar Pagamento
       </h1>
 
       <form
         action={atualizarPagamento}
-        style={{
-          marginTop: "30px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "14px",
-          maxWidth: "500px"
-        }}
+        className="flex flex-col gap-4 max-w-md"
       >
-
         <input type="hidden" name="id" value={pagamento.id} />
 
-        <label>Cliente</label>
-        <input value={pagamento.cliente.nomeCompleto} disabled />
+        <div className="flex flex-col gap-1">
+          <label><b>Cliente:</b> {pagamento.cliente.nomeCompleto}</label>
+        </div>
 
-        <label>Descrição</label>
-        <input name="descricao" defaultValue={pagamento.descricao ?? ""} />
+        <div className="flex flex-col gap-1">
+          <label>Valor</label>
+          <input
+            type="number"
+            step="0.01"
+            name="valor"
+            defaultValue={pagamento.valor}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Valor</label>
-        <input
-          type="number"
-          step="0.01"
-          name="valor"
-          defaultValue={pagamento.valor}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Parcela</label>
+          <input
+            type="number"
+            name="parcela"
+            defaultValue={pagamento.parcela ?? ""}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Parcela</label>
-        <input
-          type="number"
-          name="parcela"
-          defaultValue={pagamento.parcela ?? ""}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Total de parcelas</label>
+          <input
+            type="number"
+            name="totalParcelas"
+            defaultValue={pagamento.totalParcelas ?? ""}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Total de parcelas</label>
-        <input
-          type="number"
-          name="totalParcelas"
-          defaultValue={pagamento.totalParcelas ?? ""}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Data de vencimento</label>
+          <input
+            type="date"
+            name="dataVencimento"
+            defaultValue={dataVencimento}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Data de vencimento</label>
-        <input
-          type="date"
-          name="dataVencimento"
-          defaultValue={dataVencimento}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Data de pagamento</label>
+          <input
+            type="date"
+            name="dataPagamento"
+            defaultValue={dataPagamento}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Data de pagamento</label>
-        <input
-          type="date"
-          name="dataPagamento"
-          defaultValue={dataPagamento}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Forma de pagamento</label>
+          <input
+            name="formaPagamento"
+            defaultValue={pagamento.formaPagamento ?? ""}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <label>Forma de pagamento</label>
-        <input
-          name="formaPagamento"
-          defaultValue={pagamento.formaPagamento ?? ""}
-        />
+        <div className="flex flex-col gap-1">
+          <label>Status</label>
+          <select 
+            name="status" 
+            defaultValue={pagamento.status}
+            className="border border-gray-300 rounded-lg p-2.5 bg-white outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="PENDENTE">Pendente</option>
+            <option value="PAGO">Pago</option>
+          </select>
+        </div>
 
-        <label>Status</label>
-        <select name="status" defaultValue={pagamento.status}>
-          <option value="PENDENTE">Pendente</option>
-          <option value="PAGO">Pago</option>
-        </select>
+        <div className="flex flex-col gap-1">
+          <label>Descrição</label>
+          <textarea 
+            name="observacoes" 
+            rows={4}
+            defaultValue={pagamento.descricao ?? ""}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
 
-        <button
-          type="submit"
-          style={{
-            marginTop: "10px",
-            backgroundColor: "#2563eb",
-            color: "white",
-            border: "none",
-            padding: "10px",
-            borderRadius: "8px",
-            cursor: "pointer"
-          }}
-        >
-          Salvar alterações
-        </button>
+        <div style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
+          <button
+            type="submit"
+            className="bg-blue-600 text-white p-2 rounded"
+          >
+            Salvar alterações
+          </button>
 
+          <Link href={`/financeiro/${id}`}>
+            <button 
+              type="submit"
+              className="bg-red-600 text-white p-2 rounded"
+            >
+              Cancelar
+            </button>
+          </Link>
+        </div>
       </form>
-
-    </div>
+    </FormCard>
   )
 }

@@ -10,6 +10,7 @@ type AuthUser = {
         name?: string | null
         role: "ADMIN" | "PARCEIRO"
         adminId?: string | null
+        adminCode?: string | null
 }
 
 export const authOptions: NextAuthOptions = {
@@ -52,6 +53,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           adminId: user.adminId,
+          adminCode: user.adminCode
         }
 
         return authUser
@@ -61,20 +63,24 @@ export const authOptions: NextAuthOptions = {
 
   callbacks: {
     async jwt({ token, user }) {
-
-      const u = user as AuthUser | undefined
-
-      if (u) {
-        token.role = u.role
-        token.adminId = u.adminId
+      if (user) {
+        token.id = user.id
+        token.role = user.role
+        token.adminId = user.adminId ?? null
+        token.adminCode = user.adminCode ?? null
+        token.name = user.name
       }
       return token
     },
 
     async session({ session, token }) {
-      session.user.id = token.sub as string
-      session.user.role = token.role as "ADMIN" | "PARCEIRO"
-      session.user.adminId = token.adminId as string | null
+      if(session.user) {
+        session.user.id = token.id as string
+        session.user.role = token.role as "ADMIN" | "PARCEIRO"
+        session.user.adminId = token.adminId ?? null
+        session.user.adminCode = token.adminCode ?? null
+        session.user.name = token.name
+      }
 
       return session
     }
