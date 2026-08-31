@@ -37,7 +37,6 @@ export default function ExcluirCliente({ id }: Props) {
         padding: "8px 16px",
         borderRadius: "6px",
         border: "none",
-        cursor: "pointer",
       }}
     >
       Excluir
