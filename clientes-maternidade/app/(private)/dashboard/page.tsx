@@ -4,6 +4,7 @@ import { getAdminId } from "@/lib/getAdminId"
 import { calcularResumoAlertas } from "@/lib/alertaParto"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { getSemanaAtual } from "@/lib/semanaAtual"
 
 export const dynamic = "force-dynamic"
 
@@ -20,15 +21,12 @@ export default async function Dashboard() {
   const resumoClientes = calcularResumoAlertas(clientes)
 
   const hoje = new Date()
-  hoje.setHours(0,0,0,0)
 
   // Semana atual
-  const inicioSemana = new Date(hoje)
-  inicioSemana.setDate(hoje.getDate() - hoje.getDay())
-
-  const fimSemana = new Date(inicioSemana)
-  fimSemana.setDate(inicioSemana.getDate() + 7)
-  fimSemana.setHours(23,59,59,999)
+  const {
+    inicioSemana,
+    inicioProximaSemana,
+  } = getSemanaAtual()
 
   const totalAtrasados = await prisma.pagamento.count({
     // 🔴 Atrasados
@@ -63,14 +61,14 @@ export default async function Dashboard() {
     // 🏥 Processos em Análise
     where: {
       adminId: adminId,
-      faseProcesso: "ANALISE_DOCUMENTOS"
+      faseProcesso: "PROCESSO_ENVIADO_INSS"
     }
   })
   const totalPartosSemana = await prisma.cliente.count({
     // 📅 Partos nesta semana
     where: {
       adminId: adminId,
-      dataProvavelParto: { gte: inicioSemana, lte: fimSemana } // gte = greater than or equal, lte = less than or equal
+      dataProvavelParto: { gte: inicioSemana, lt: inicioProximaSemana } // gte = greater than or equal, lt = less than
     }
   })
 
@@ -126,10 +124,10 @@ export default async function Dashboard() {
         </Link>
 
         <Link
-          href="/clientes?fase=ANALISE_DOCUMENTOS"
+          href="/clientes?fase=PROCESSO_ENVIADO_INSS"
           style={{ ...cardStyle, background: "#e0f2fe" }}
         >
-          🏥 {totalProcessosAnalise} processos em análise
+          🏥 {totalProcessosAnalise} processos em análise no INSS
         </Link>
 
       </div>

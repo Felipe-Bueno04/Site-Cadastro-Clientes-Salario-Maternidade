@@ -1,11 +1,12 @@
+import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { Prisma, Cliente, StatusCliente, FaseProcesso } from "@prisma/client"
-import Link from "next/link"
 import StatusFilter from "./[id]/components/StatusFilter"
 import FaseFilter from "./[id]/components/FaseFilter"
 import { getAlertaParto } from "@/lib/alertaParto"
 import { calcularResumoAlertas } from "@/lib/alertaParto"
 import { getAdminId } from "@/lib/getAdminId"
+import { getSemanaAtual } from "@/lib/semanaAtual"
 
 export const dynamic = "force-dynamic"
 
@@ -66,25 +67,20 @@ export default async function Clientes({ searchParams }: PageProps) {
   hoje.setHours(0,0,0,0)
 
   if (alerta === "semana") {
-
-    const inicioSemana = new Date(hoje)
-    inicioSemana.setDate(hoje.getDate() - hoje.getDay())
-    inicioSemana.setHours(0,0,0,0)
-
-    const fimSemana = new Date(inicioSemana)
-    fimSemana.setDate(inicioSemana.getDate() + 7)
-    fimSemana.setHours(23,59,59,999)
+    const {
+      inicioSemana,
+      inicioProximaSemana,
+    } = getSemanaAtual()
 
     where.dataProvavelParto = {
       // gte = greater than or equal
       gte: inicioSemana,
-      // lte = less than or equal
-      lte: fimSemana
+      // lt = less than
+      lt: inicioProximaSemana,
     }
   }
 
   if (alerta === "15dias") {
-
     const limite = new Date()
     limite.setDate(limite.getDate() + 15)
     limite.setHours(23,59,59,999)
@@ -98,7 +94,6 @@ export default async function Clientes({ searchParams }: PageProps) {
   }
 
   if (alerta === "30dias") {
-
     const inicio = new Date()
     inicio.setDate(inicio.getDate() + 16)
     inicio.setHours(0,0,0,0)
@@ -125,15 +120,13 @@ export default async function Clientes({ searchParams }: PageProps) {
   const totalClientes = await prisma.cliente.count({ where })
 
   const clientes = await prisma.cliente.findMany({
-  where: {
-    adminId: adminId,
-  },
-  orderBy: {
-    createdAt: "desc",
-  },
-  take: itensPorPagina,
-  skip,
-})
+    where,
+    orderBy: {
+      createdAt: "desc",
+    },
+    take: itensPorPagina,
+    skip,
+  })
 
   const totalPaginas = Math.ceil(totalClientes / itensPorPagina)
   const todosClientes = await prisma.cliente.findMany({
@@ -145,10 +138,10 @@ export default async function Clientes({ searchParams }: PageProps) {
 
   function gerarLinkPagina(p: number) {
     return `/clientes?page=${p}${
-      busca ? `&busca=${busca}` : ""
+      busca ? `&busca=${encodeURIComponent(busca)}` : ""
     }${status ? `&status=${status}` : ""}${
       fase ? `&fase=${fase}` : ""
-    }`
+    }${alerta ? `&alerta=${alerta}` : ""}`
   }
 
   const thStyle = {
