@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useSession, signOut } from "next-auth/react"
+import { useSession } from "next-auth/react"
 
 export default function Sidebar() {
   const { data: session } = useSession()
@@ -25,13 +25,6 @@ export default function Sidebar() {
           </Link>
         )}
       </nav>
-
-      <button
-        onClick={() => signOut({ callbackUrl: "/login" })}
-        className="bg-red-500 hover:bg-red-600 text-white p-2 rounded mt-6 transition"
-      >
-        Sair
-      </button>
     </aside>
   )
 }
