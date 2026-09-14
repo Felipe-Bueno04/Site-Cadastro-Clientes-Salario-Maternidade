@@ -8,9 +8,9 @@ import { notFound } from "next/navigation"
 async function marcarComoPago(formData: FormData) {
   "use server"
 
-  const pagamentoId = formData.get("pagamentoId") as string
-  
   const adminId = await getAdminId()
+
+  const pagamentoId = formData.get("pagamentoId") as string
 
   const pagamento = await prisma.pagamento.findFirst({
     where: {
@@ -38,6 +38,21 @@ async function marcarComoPago(formData: FormData) {
   revalidatePath("/financeiro")
 }
 
+const meses = [
+  { valor: "1", nome: "Janeiro" },
+  { valor: "2", nome: "Fevereiro" },
+  { valor: "3", nome: "Março" },
+  { valor: "4", nome: "Abril" },
+  { valor: "5", nome: "Maio" },
+  { valor: "6", nome: "Junho" },
+  { valor: "7", nome: "Julho" },
+  { valor: "8", nome: "Agosto" },
+  { valor: "9", nome: "Setembro" },
+  { valor: "10", nome: "Outubro" },
+  { valor: "11", nome: "Novembro" },
+  { valor: "12", nome: "Dezembro" },
+]
+
 export default async function FinanceiroPage({
   searchParams,
 }: {
@@ -45,6 +60,7 @@ export default async function FinanceiroPage({
     status?: string
     cliente?: string
     alerta?: string
+    mesPagamento?: string
   }>
 }) {
   const adminId = await getAdminId()
@@ -54,6 +70,7 @@ export default async function FinanceiroPage({
   const status = params?.status
   const clienteBusca = params?.cliente
   const alerta = params?.alerta
+  const mesPagamento = params?.mesPagamento
 
   const hoje = new Date()
   hoje.setHours(0,0,0,0)
@@ -67,16 +84,16 @@ export default async function FinanceiroPage({
           nomeCompleto: {
             contains: clienteBusca,
             mode: "insensitive"
-          }
-        }
+          },
+        },
       },
       {
         cliente: {
           cpf: {
             contains: clienteBusca
-          }
-        }
-      }
+          },
+        },
+      },
     ]
   }
 
@@ -102,6 +119,41 @@ export default async function FinanceiroPage({
 
   if (status === "PAGO") {
     where.status = "PAGO"
+  }
+
+   /*
+   * FILTRO POR MÊS DO PAGAMENTO
+   *
+   * Considera apenas o mês de dataPagamento,
+   * independentemente do ano.
+   *
+   * Exemplo:
+   * Janeiro → pagamentos realizados em janeiro de qualquer ano.
+   */
+  if (mesPagamento) {
+    const mes = Number(mesPagamento)
+
+    if (mes >= 1 && mes <= 12) {
+      const pagamentosDoMes = await prisma.$queryRaw<{ id: string }[]>`
+        SELECT "id"
+        FROM "Pagamento"
+        WHERE "dataPagamento" IS NOT NULL
+          AND EXTRACT(MONTH FROM "dataPagamento") = ${mes}
+          AND "clienteId" IN (
+            SELECT "idCliente"
+            FROM "Cliente"
+            WHERE "adminId" = ${adminId}
+          )
+      `
+
+      const ids = pagamentosDoMes.map(
+        (pagamento) => pagamento.id
+      )
+
+      where.id = {
+        in: ids,
+      }
+    }
   }
 
   const pagamentos = await prisma.pagamento.findMany({
@@ -175,7 +227,6 @@ export default async function FinanceiroPage({
       </div>
 
       {/* ALERTAS */}
-
       <div
         style={{
           display: "flex",
@@ -201,9 +252,9 @@ export default async function FinanceiroPage({
             ⚠️ {totalAtrasados} pagamentos atrasados
           </div>
         </Link>
-
       </div>
 
+      {/* FILTROS */}
       <form
         method="GET"
         style={{
@@ -230,6 +281,27 @@ export default async function FinanceiroPage({
             fontSize: "14px",
           }}
         />
+
+        <select
+          name="mesPagamento"
+          defaultValue={mesPagamento || ""}
+          style={{
+            padding: "10px 14px",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "white",
+            fontSize: "14px",
+            cursor: "pointer",
+          }}
+        >
+          <option value="">Mês do pagamento</option>
+
+          {meses.map((mes) => (
+            <option key={mes.valor} value={mes.valor}>
+              {mes.nome}
+            </option>
+          ))}
+        </select>
 
         <button
           type="submit"

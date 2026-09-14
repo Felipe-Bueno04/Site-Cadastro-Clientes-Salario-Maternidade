@@ -1,13 +1,32 @@
 "use client"
 
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { FaseProcesso } from "@prisma/client"
 
 export default function FaseFilter() {
   const router = useRouter()
   const searchParams = useSearchParams()
+
   const [open, setOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => { 
+    function handleClickOutside(event: MouseEvent) { 
+      if ( 
+        dropdownRef.current && 
+        !dropdownRef.current.contains(event.target as Node) 
+      ) { 
+        setOpen(false) 
+      } 
+    } 
+    
+    document.addEventListener("mousedown", handleClickOutside) 
+    
+    return () => { 
+      document.removeEventListener("mousedown", handleClickOutside) 
+    } 
+  }, [])
 
   function atualizarFiltro(valor: string) {
     const params = new URLSearchParams(searchParams.toString())
@@ -23,7 +42,12 @@ export default function FaseFilter() {
   }
 
   return (
-    <div style={{ position: "relative" }}>
+    <div 
+      ref={dropdownRef}
+      style={{ 
+        position: "relative" 
+      }}
+    >
       <span
         style={{ cursor: "pointer", fontWeight: 600 }}
         onClick={() => setOpen(!open)}

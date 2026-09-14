@@ -17,8 +17,24 @@ interface PageProps {
     status?: StatusCliente
     fase?: FaseProcesso
     alerta?: string
+    mesParto?: string
   }>
 }
+
+const meses = [
+  { valor: "1", nome: "Janeiro" },
+  { valor: "2", nome: "Fevereiro" },
+  { valor: "3", nome: "Março" },
+  { valor: "4", nome: "Abril" },
+  { valor: "5", nome: "Maio" },
+  { valor: "6", nome: "Junho" },
+  { valor: "7", nome: "Julho" },
+  { valor: "8", nome: "Agosto" },
+  { valor: "9", nome: "Setembro" },
+  { valor: "10", nome: "Outubro" },
+  { valor: "11", nome: "Novembro" },
+  { valor: "12", nome: "Dezembro" },
+]
 
 export default async function Clientes({ searchParams }: PageProps) {
   const adminId = await getAdminId()
@@ -30,6 +46,7 @@ export default async function Clientes({ searchParams }: PageProps) {
   const status = params?.status
   const fase = params?.fase
   const alerta = params?.alerta
+  const mesParto = params?.mesParto
 
   const paginaAtual = Number(page) || 1
   const itensPorPagina = 10
@@ -61,6 +78,32 @@ export default async function Clientes({ searchParams }: PageProps) {
     ...(fase && {
       faseProcesso: fase,
     }),
+  }
+
+   /*
+   * FILTRO POR MÊS DO PROVÁVEL PARTO
+   *
+   * O filtro considera apenas o mês, independentemente do ano.
+   * Exemplo: agosto encontra 08/2025, 08/2026, 08/2027 etc.
+   */
+  if (mesParto) {
+    const mes = Number(mesParto)
+
+    if (mes >= 1 && mes <= 12) {
+      const clientesDoMes = await prisma.$queryRaw<{ idCliente: string }[]>`
+        SELECT "idCliente"
+        FROM "Cliente"
+        WHERE "adminId" = ${adminId}
+          AND "dataProvavelParto" IS NOT NULL
+          AND EXTRACT(MONTH FROM "dataProvavelParto") = ${mes}
+      `
+
+      const ids = clientesDoMes.map((cliente) => cliente.idCliente)
+
+      where.idCliente = {
+        in: ids,
+      }
+    }
   }
 
   const hoje = new Date()
@@ -129,6 +172,7 @@ export default async function Clientes({ searchParams }: PageProps) {
   })
 
   const totalPaginas = Math.ceil(totalClientes / itensPorPagina)
+
   const todosClientes = await prisma.cliente.findMany({
     where: {
       adminId: adminId,
@@ -209,6 +253,26 @@ export default async function Clientes({ searchParams }: PageProps) {
             border: "1px solid #e5e7eb",
           }}
         />
+
+        <select
+          name="mesParto"
+          defaultValue={mesParto ?? ""}
+          style={{
+            padding: "10px",
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb",
+            backgroundColor: "white",
+            cursor: "pointer",
+          }}
+        >
+          <option value="">Mês do provável parto</option>
+
+          {meses.map((mes) => (
+            <option key={mes.valor} value={mes.valor}>
+              {mes.nome}
+            </option>
+          ))}
+        </select>
 
         <button
           type="submit"
