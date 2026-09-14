@@ -68,8 +68,13 @@ export default async function Dashboard() {
     // 📅 Partos nesta semana
     where: {
       adminId: adminId,
-      dataProvavelParto: { gte: inicioSemana, lt: inicioProximaSemana } // gte = greater than or equal, lt = less than
-    }
+      dataProvavelParto: { 
+        // gte = greater than or equal
+        gte: inicioSemana, 
+        //lt = less than
+        lt: inicioProximaSemana 
+      },
+    },
   })
 
   const cardStyle = {
