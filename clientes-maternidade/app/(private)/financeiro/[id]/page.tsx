@@ -16,7 +16,7 @@ export default async function DetalhesPagamento({ params }: Props) {
 
   const pagamento = await prisma.pagamento.findFirst({
     where: {
-      id: id,
+      idPagamento: id,
       cliente: {
         adminId: adminId
       }
@@ -45,7 +45,7 @@ export default async function DetalhesPagamento({ params }: Props) {
           Detalhes do Pagamento
         </h1>
 
-        <Link href={`/financeiro/${pagamento.id}/editar`}>
+        <Link href={`/financeiro/${pagamento.idPagamento}/editar`}>
           <button
             style={{
               backgroundColor: "#2563eb",
@@ -73,7 +73,7 @@ export default async function DetalhesPagamento({ params }: Props) {
         }}
       >
 
-        <p><strong>Cliente:</strong> {pagamento.cliente.nomeCompleto}</p>
+        <p><strong>Cliente:</strong> {pagamento.cliente?.nomeCompleto}</p>
 
         <p><strong>Valor:</strong> R$ {pagamento.valor.toFixed(2)}</p>
 

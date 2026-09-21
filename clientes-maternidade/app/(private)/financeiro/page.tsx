@@ -4,6 +4,7 @@ import Link from "next/link"
 import { revalidatePath } from "next/cache"
 import { getAdminId } from "@/lib/getAdminId"
 import { notFound } from "next/navigation"
+import PeriodoSelect from "./components/PeriodoSelect"
 
 async function marcarComoPago(formData: FormData) {
   "use server"
@@ -14,7 +15,7 @@ async function marcarComoPago(formData: FormData) {
 
   const pagamento = await prisma.pagamento.findFirst({
     where: {
-      id: pagamentoId,
+      idPagamento: pagamentoId,
       cliente: {
         adminId: adminId
       },
@@ -27,7 +28,7 @@ async function marcarComoPago(formData: FormData) {
 
   await prisma.pagamento.update({
     where: {
-      id: pagamentoId,
+      idPagamento: pagamentoId,
     },
     data: {
       status: "PAGO",
@@ -61,6 +62,7 @@ export default async function FinanceiroPage({
     cliente?: string
     alerta?: string
     mesPagamento?: string
+    periodo?: "hoje" | "semana" | "mes" | "ano"
   }>
 }) {
   const adminId = await getAdminId()
@@ -74,6 +76,45 @@ export default async function FinanceiroPage({
 
   const hoje = new Date()
   hoje.setHours(0,0,0,0)
+
+  function getPeriodoRange(periodo: string) {
+    const inicio = new Date(hoje)
+    const fim = new Date(hoje)
+    fim.setHours(23, 59, 59, 999)
+
+    switch (periodo) {
+      case "hoje":
+        return { inicio, fim }
+      case "semana": {
+        const diaSemana = hoje.getDay() // 0=Dom, 6=Sáb
+        const diff = diaSemana === 0 ? 6 : diaSemana - 1 // Segunda=0
+        inicio.setDate(hoje.getDate() - diff)
+        inicio.setHours(0, 0, 0, 0)
+        fim.setDate(inicio.getDate() + 6)
+        fim.setHours(23, 59, 59, 999)
+        return { inicio, fim }
+      }
+      case "mes": {
+        inicio.setDate(1)
+        inicio.setHours(0, 0, 0, 0)
+        fim.setMonth(hoje.getMonth() + 1, 0) // último dia do mês
+        fim.setHours(23, 59, 59, 999)
+        return { inicio, fim }
+      }
+      case "ano": {
+        inicio.setMonth(0, 1)
+        inicio.setHours(0, 0, 0, 0)
+        fim.setMonth(11, 31)
+        fim.setHours(23, 59, 59, 999)
+        return { inicio, fim }
+      }
+      default:
+        return { inicio, fim }
+    }
+  }
+
+  const periodo = params?.periodo || "hoje"  // DEFAULT: "hoje"
+  const { inicio: periodoInicio, fim: periodoFim } = getPeriodoRange(periodo)
 
   const where: Prisma.PagamentoWhereInput = {}
 
@@ -134,8 +175,8 @@ export default async function FinanceiroPage({
     const mes = Number(mesPagamento)
 
     if (mes >= 1 && mes <= 12) {
-      const pagamentosDoMes = await prisma.$queryRaw<{ id: string }[]>`
-        SELECT "id"
+      const pagamentosDoMes = await prisma.$queryRaw<{ idPagamento: string }[]>`
+        SELECT "idPagamento"
         FROM "Pagamento"
         WHERE "dataPagamento" IS NOT NULL
           AND EXTRACT(MONTH FROM "dataPagamento") = ${mes}
@@ -147,10 +188,10 @@ export default async function FinanceiroPage({
       `
 
       const ids = pagamentosDoMes.map(
-        (pagamento) => pagamento.id
+        (pagamento) => pagamento.idPagamento
       )
 
-      where.id = {
+      where.idPagamento = {
         in: ids,
       }
     }
@@ -164,7 +205,13 @@ export default async function FinanceiroPage({
       }
     },
     include: {
-      cliente: true
+      cliente: {
+        select: {
+          idCliente: true,
+          nomeCompleto: true,
+          statusCliente: true
+        }
+      }
     },
     orderBy: {
       dataVencimento: "asc"
@@ -179,9 +226,30 @@ export default async function FinanceiroPage({
       dataVencimento: {
         // lt = less than 
         lt: hoje
+      },
+      cliente: {
+        adminId: adminId
       }
     }
   })
+
+  const faturamento = await prisma.pagamento.aggregate({
+    where: {
+      status: "PAGO",
+      dataPagamento: {
+        gte: periodoInicio,
+        lte: periodoFim,
+      },
+      cliente: {
+        adminId: adminId,
+      },
+    },
+    _sum: {
+      valor: true,
+    },
+  })
+
+  const totalFaturamento = faturamento._sum.valor || 0
 
   const thStyle = {
     textAlign: "left" as const,
@@ -253,6 +321,48 @@ export default async function FinanceiroPage({
           </div>
         </Link>
       </div>
+      
+      {/* PERÍODO DE FATURAMENTO */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          marginBottom: "20px",
+          flexWrap: "wrap",
+        }}
+      >
+        <span style={{ fontWeight: 500, color: "#374151" }}>Período:</span>
+        
+        <form method="GET" style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          {/* Preservar outros filtros */}
+          <input type="hidden" name="status" value={status || ""} />
+          <input type="hidden" name="alerta" value={alerta || ""} />
+          <input type="hidden" name="cliente" value={clienteBusca || ""} />
+          <input type="hidden" name="mesPagamento" value={mesPagamento || ""} />
+          
+          <PeriodoSelect></PeriodoSelect>
+        </form>
+
+        {/* CARD FATURAMENTO */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%)",
+            color: "white",
+            padding: "16px 24px",
+            borderRadius: "12px",
+            boxShadow: "0 4px 20px rgba(30, 58, 138, 0.3)",
+            minWidth: "220px",
+          }}
+        >
+          <div style={{ fontSize: "12px", opacity: 0.8, textTransform: "uppercase", letterSpacing: "0.5px" }}>
+            Faturamento ({periodo === "hoje" ? "Hoje" : periodo === "semana" ? "Essa semana" : periodo === "mes" ? "Este mês" : "Este ano"})
+          </div>
+          <div style={{ fontSize: "28px", fontWeight: 700, marginTop: "4px" }}>
+            R$ {totalFaturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}
+          </div>
+        </div>
+      </div>
 
       {/* FILTROS */}
       <form
@@ -294,7 +404,7 @@ export default async function FinanceiroPage({
             cursor: "pointer",
           }}
         >
-          <option value="">Mês do pagamento</option>
+          <option value="" disabled hidden>Mês do pagamento</option>
 
           {meses.map((mes) => (
             <option key={mes.valor} value={mes.valor}>
@@ -346,19 +456,22 @@ export default async function FinanceiroPage({
                 pagamento.status !== "PAGO" &&
                 new Date(pagamento.dataVencimento) < hoje
 
+              const isInactive = pagamento.cliente?.statusCliente === "INATIVA";
               let corLinha = "transparent"
 
               if (pagamento.status === "PAGO") {
                 corLinha = "#96eeb5" // verde claro
+              } else if (atrasado) {
+                corLinha = "#f1adad" // vermelho claro
               }
 
-              if (atrasado) {
-                corLinha = "#f1adad" // vermelho claro
+              if (isInactive) {
+                corLinha = "#e5e7eb"; // gray-100
               }
 
               return (
                 <tr
-                  key={pagamento.id}
+                  key={pagamento.idPagamento}
                   style={{
                     borderTop: "1px solid #f1f5f9",
                     backgroundColor: corLinha,
@@ -367,14 +480,14 @@ export default async function FinanceiroPage({
                 >
                   <td style={tdStyle}>
                     <Link
-                      href={`/financeiro/${pagamento.id}`}
+                      href={`/financeiro/${pagamento.idPagamento}`}
                       style={{
                         color: "#2563eb",
                         fontWeight: 500,
                         textDecoration: "none",
                       }}
                     >
-                      {pagamento.cliente.nomeCompleto}
+                      {pagamento.cliente?.nomeCompleto}
                     </Link>
 
                   </td>
@@ -397,7 +510,7 @@ export default async function FinanceiroPage({
                         <input
                           type="hidden"
                           name="pagamentoId"
-                          value={pagamento.id}
+                          value={pagamento.idPagamento}
                         />
                           <button
                             type="submit"
