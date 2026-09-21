@@ -51,7 +51,7 @@ export async function POST(req: Request) {
         email,
         password: hashedPassword,
         role: "PARCEIRO",
-        adminId: admin.id,
+        adminId: admin.idUser,
       },
     })
 

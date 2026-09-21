@@ -31,7 +31,7 @@ async function atualizarPagamento(formData: FormData) {
   const adminId = await getAdminId()
   const pagamento = await prisma.pagamento.findFirst({
     where: {
-      id,
+      idPagamento: id,
       cliente: {
         adminId: adminId
       }
@@ -43,7 +43,7 @@ async function atualizarPagamento(formData: FormData) {
   }
 
   await prisma.pagamento.update({
-    where: { id },
+    where: { idPagamento: id },
 
     data: {
       descricao,
@@ -71,7 +71,7 @@ export default async function EditarPagamento({ params }: Props) {
 
   const pagamento = await prisma.pagamento.findFirst({
     where: { 
-      id: id,
+      idPagamento: id,
       cliente: {
         adminId: adminId
       } 
@@ -104,10 +104,10 @@ export default async function EditarPagamento({ params }: Props) {
         action={atualizarPagamento}
         className="flex flex-col gap-4 max-w-md"
       >
-        <input type="hidden" name="id" value={pagamento.id} />
+        <input type="hidden" name="id" value={pagamento.idPagamento} />
 
         <div className="flex flex-col gap-1">
-          <label><b>Cliente:</b> {pagamento.cliente.nomeCompleto}</label>
+          <label><b>Cliente:</b> {pagamento.cliente?.nomeCompleto}</label>
         </div>
 
         <div className="flex flex-col gap-1">
