@@ -54,6 +54,7 @@ export default async function Clientes({ searchParams }: PageProps) {
 
   const where: Prisma.ClienteWhereInput = {
     adminId: adminId,
+    statusCliente: { not: "INATIVA" },
 
     ...(busca && {
       OR: [
@@ -342,6 +343,21 @@ export default async function Clientes({ searchParams }: PageProps) {
             ⚠️ {resumo.atrasados} partos atrasados
           </div>
         </Link>
+
+        <Link 
+          href="/clientes?status=INATIVA" 
+          style={{ textDecoration: "none" }}>
+            <div style={{
+              background: "#9ca3af",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              fontWeight: 600,
+              cursor: "pointer"
+            }}>
+              Ver clientes inativos
+            </div>
+        </Link>
+
       </div>
 
       {/* TABELA */}

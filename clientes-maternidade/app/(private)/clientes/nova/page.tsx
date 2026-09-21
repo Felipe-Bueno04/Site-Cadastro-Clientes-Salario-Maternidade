@@ -231,7 +231,6 @@ export default function CriarCliente() {
             <option value="ATIVA">Ativa</option>
             <option value="INATIVA">Inativa</option>
             <option value="FINALIZADA">Finalizada</option>
-            <option value="CANCELADA">Cancelada</option>
           </select>
         </div>
 

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import Link from "next/link"
-import ExcluirCliente from "./components/BotaoExcluir"
+import InativarCliente from "./components/BotaoInativarCliente"
 import { getAdminId } from "@/lib/getAdminId"
 
 export const dynamic = "force-dynamic"
@@ -68,7 +68,11 @@ export default async function DetalheCliente({ params }: Props) {
             </button>
           </Link>
           
-          <ExcluirCliente id={cliente.idCliente} />
+          <InativarCliente
+            id={cliente.idCliente}
+            nomeCompleto={cliente.nomeCompleto}
+            statusAtual={cliente.statusCliente}
+          />
 
           <Link href="/clientes">
             <button
