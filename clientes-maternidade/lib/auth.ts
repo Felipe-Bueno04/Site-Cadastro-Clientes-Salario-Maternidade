@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
         if (!isValid) return null
 
         const authUser: AuthUser = {
-          id: user.id,
+          id: user.idUser,
           email: user.email,
           name: user.name,
           role: user.role,

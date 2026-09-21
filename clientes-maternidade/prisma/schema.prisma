@@ -9,80 +9,69 @@ datasource db {
 }
 
 model Cliente {
-  idCliente            String    @id @default(uuid())
-  nomeCompleto         String
-  cpf                  String
-  telefone             String
-  email                String?
-  instagram            String?
-  criadoPor            String?
-  recebeBolsaFamilia   Boolean
-  tempoGestacaoSemanas Int?
-  dataProvavelParto    DateTime?
-  mesParto             Int?
-  anoParto             Int?
-  possuiSenhaGov       Boolean
-  senhaGov             String?
-  observacoes          String?
-
-  statusCliente     StatusCliente
-  faseProcesso      FaseProcesso
-  statusContrato    StatusContrato
-  statusNascimento  StatusNascimento
-  dataCadastro      DateTime
-  dataEnvioContrato DateTime?
-  dataAssinatura    DateTime?
-
-  alertaParto30Dias Boolean @default(false)
-  alertaParto15Dias Boolean @default(false)
-
-  pagamentos Pagamento[]
-
-  adminId String
-  admin   User   @relation("AdminClientes", fields: [adminId], references: [id])
-
-  createdAt DateTime @default(now())
+  idCliente            String           @id @default(uuid()) @map("idCliente")
+  nomeCompleto         String           @map("nomeCompleto")
+  cpf                  String           @map("cpf")
+  telefone             String           @map("telefone")
+  email                String?          @map("email")
+  instagram            String?          @map("instagram")
+  recebeBolsaFamilia   Boolean          @map("recebeBolsaFamilia")
+  tempoGestacaoSemanas Int?             @map("tempoGestacaoSemanas")
+  dataProvavelParto    DateTime?        @map("dataProvavelParto")
+  mesParto             Int?             @map("mesParto")
+  anoParto             Int?             @map("anoParto")
+  possuiSenhaGov       Boolean          @map("possuiSenhaGov")
+  senhaGov             String?          @map("senhaGov")
+  observacoes          String?          @map("observacoes")
+  statusCliente        StatusCliente    @map("statusCliente")
+  faseProcesso         FaseProcesso     @map("faseProcesso")
+  statusContrato       StatusContrato   @map("statusContrato")
+  statusNascimento     StatusNascimento @map("statusNascimento")
+  dataCadastro         DateTime         @map("dataCadastro")
+  dataEnvioContrato    DateTime?        @map("dataEnvioContrato")
+  dataAssinatura       DateTime?        @map("dataAssinatura")
+  alertaParto30Dias    Boolean          @default(false) @map("alertaParto30Dias")
+  alertaParto15Dias    Boolean          @default(false) @map("alertaParto15Dias")
+  adminId              String           @map("adminId")
+  createdAt            DateTime         @default(now()) @map("createdAt")
+  criadoPor            String?          @map("criadoPor")
+  admin                User             @relation("AdminClientes", fields: [adminId], references: [idUser])
+  pagamentos           Pagamento[]
 }
 
 model Pagamento {
-  id        String  @id @default(uuid())
-  clienteId String
-  cliente   Cliente @relation(fields: [clienteId], references: [idCliente])
-
-  valor          Float
-  dataVencimento DateTime
-  dataPagamento  DateTime?
-  status         StatusPagamento
-  createdAt      DateTime        @default(now())
-  descricao      String?
-  formaPagamento String?
-  parcela        Int?
-  totalParcelas  Int?
+  idPagamento    String          @id @default(uuid()) @map("idPagamento")
+  clienteId      String?         @map("clienteId")
+  valor          Float           @map("valor")
+  dataVencimento DateTime        @map("dataVencimento")
+  dataPagamento  DateTime?       @map("dataPagamento")
+  status         StatusPagamento @map("status")
+  createdAt      DateTime        @default(now()) @map("createdAt")
+  descricao      String?         @map("descricao")
+  formaPagamento String?         @map("formaPagamento")
+  parcela        Int?            @map("parcela")
+  totalParcelas  Int?            @map("totalParcelas")
+  cliente        Cliente?        @relation(fields: [clienteId], references: [idCliente])
 }
 
 model User {
-  id       String  @id @default(cuid())
-  name     String?
-  email    String  @unique
-  password String
-  role     Role    @default(PARCEIRO)
-
-  adminCode String? @unique
-
-  adminId   String?
-  admin     User?   @relation("AdminToPartners", fields: [adminId], references: [id])
-  parceiros User[]  @relation("AdminToPartners")
-
-  clientes Cliente[] @relation("AdminClientes")
-
-  createdAt DateTime @default(now())
+  idUser    String    @id @default(cuid()) @map("idUser")
+  name      String?
+  email     String    @unique
+  password  String
+  role      Role      @default(PARCEIRO)
+  adminId   String?   @map("adminId")
+  createdAt DateTime  @default(now()) @map("createdAt")
+  adminCode String?   @unique
+  clientes  Cliente[] @relation("AdminClientes")
+  admin     User?     @relation("AdminToPartners", fields: [adminId], references: [idUser])
+  parceiros User[]    @relation("AdminToPartners")
 }
 
 enum StatusCliente {
   ATIVA
   INATIVA
   FINALIZADA
-  CANCELADA
 }
 
 enum FaseProcesso {
