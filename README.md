@@ -23,17 +23,7 @@ O projeto utiliza:
 
 ### 1. Abrir o projeto no VS Code
 
-Abra no VS Code a pasta raiz do projeto.
-
-A pasta deve conter arquivos e diretórios semelhantes a:
-
-```text
-package.json
-prisma/
-app/
-lib/
-middleware.ts
-```
+Abra no VS Code a pasta `clientes-maternidade`, que contém o arquivo `package.json` e os diretórios `prisma/`, `app/` e `lib/`.
 
 ---
 
@@ -49,11 +39,36 @@ Ou utilize o atalho:
 Ctrl + `
 ```
 
+Execute os comandos abaixo dentro da pasta `clientes-maternidade`.
+
 ---
 
-### 3. Instalar as dependências
+### 3. Criar e configurar o arquivo `.env`
 
-Caso seja a primeira vez executando o projeto na máquina, rode:
+Na pasta `clientes-maternidade`, crie ou edite o arquivo `.env` com as seguintes variáveis:
+
+```env
+DATABASE_URL="postgresql://USUARIO:SENHA@HOST:PORTA/BANCO_DE_DADOS"
+DIRECT_URL="postgresql://USUARIO:SENHA@HOST:PORTA/BANCO_DE_DADOS"
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="cole_aqui_o_secret_gerado"
+```
+
+Substitua `DATABASE_URL` e `DIRECT_URL` pelas credenciais do PostgreSQL ou Supabase. O `NEXTAUTH_URL` pode ser alterado para outra porta ou endereço disponível na sua máquina ou rede, por exemplo, `http://localhost:3001`.
+
+Para gerar o `NEXTAUTH_SECRET`, execute na pasta do projeto:
+
+```bash
+npx auth secret
+```
+
+Copie o valor retornado para `NEXTAUTH_SECRET` no `.env`. Nunca compartilhe ou versiona esse arquivo, pois ele contém credenciais e secrets.
+
+---
+
+### 4. Instalar as dependências
+
+Execute:
 
 ```bash
 npm install
@@ -63,7 +78,7 @@ Esse comando instala todas as dependências definidas no `package.json`.
 
 ---
 
-### 4. Gerar o Prisma Client
+### 5. Gerar o Prisma Client
 
 Depois de instalar as dependências, execute:
 
@@ -72,25 +87,6 @@ npx prisma generate
 ```
 
 Esse comando gera o Prisma Client utilizado pelo projeto para comunicação com o banco de dados.
-
----
-
-### 5. Verificar as variáveis de ambiente
-
-O projeto utiliza variáveis de ambiente para configurações como:
-
-* Conexão com o banco de dados PostgreSQL / Supabase
-* Secret utilizado pelo NextAuth
-
-Verifique se o arquivo de variáveis de ambiente está configurado corretamente antes de iniciar o sistema.
-
-Exemplo de arquivo:
-
-```text
-.env
-```
-
-Não compartilhe ou versiona informações sensíveis, como senhas, chaves ou secrets.
 
 ---
 
@@ -114,13 +110,7 @@ Acesse esse endereço pelo navegador.
 
 ### 7. Fluxo resumido
 
-Se o projeto já estiver configurado e as dependências já estiverem instaladas, normalmente basta executar:
-
-```bash
-npm run dev
-```
-
-Caso esteja configurando o projeto novamente em uma máquina nova:
+Caso esteja configurando o projeto novamente em uma máquina nova, execute nesta ordem:
 
 ```bash
 npm install
