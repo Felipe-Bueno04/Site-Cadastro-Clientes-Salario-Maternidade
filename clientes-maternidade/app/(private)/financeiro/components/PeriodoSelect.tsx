@@ -6,7 +6,7 @@ export default function PeriodoSelect() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const periodoAtual = searchParams.get("periodo") || "ano"
+  const periodoAtual = searchParams.get("periodo") || "hoje"
 
   function handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const params = new URLSearchParams(searchParams.toString())
