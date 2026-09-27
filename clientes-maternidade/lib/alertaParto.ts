@@ -1,3 +1,5 @@
+import { Cliente } from "@prisma/client"
+
 export function getAlertaParto(dataProvavelParto?: Date | null) {
  if (!dataProvavelParto) return null
 
@@ -37,7 +39,9 @@ export function getAlertaParto(dataProvavelParto?: Date | null) {
  return null
 }
 
-export function calcularResumoAlertas(clientes: any[]) {
+export function calcularResumoAlertas(
+  clientes: Pick<Cliente, "dataProvavelParto">[]
+) {
 
  let parto15 = 0
  let parto30 = 0
