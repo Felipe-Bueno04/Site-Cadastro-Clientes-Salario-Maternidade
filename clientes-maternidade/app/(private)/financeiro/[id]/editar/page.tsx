@@ -3,6 +3,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { redirect, notFound } from "next/navigation"
 import { revalidatePath } from "next/cache"
+import { StatusPagamento } from "@prisma/client"
 import { getAdminId } from "@/lib/getAdminId"
 import { FormCard } from "@/components/FormCard"
 
@@ -19,6 +20,7 @@ async function atualizarPagamento(formData: FormData) {
 
   const descricao = formData.get("descricao") as string
   const valor = Number(formData.get("valor"))
+  const valorClienteAReceber = Number(formData.get("valorClienteAReceber"))
   const parcela = Number(formData.get("parcela"))
   const totalParcelas = Number(formData.get("totalParcelas"))
 
@@ -26,7 +28,7 @@ async function atualizarPagamento(formData: FormData) {
   const dataPagamento = formData.get("dataPagamento") as string
 
   const formaPagamento = formData.get("formaPagamento") as string
-  const status = formData.get("status") as any
+  const status = formData.get("status") as StatusPagamento
 
   const adminId = await getAdminId()
   const pagamento = await prisma.pagamento.findFirst({
@@ -48,6 +50,7 @@ async function atualizarPagamento(formData: FormData) {
     data: {
       descricao,
       valor,
+      valorClienteAReceber: valorClienteAReceber || null,
       parcela: parcela || null,
       totalParcelas: totalParcelas || null,
       dataVencimento: new Date(dataVencimento + "T00:00:00"),
@@ -117,6 +120,17 @@ export default async function EditarPagamento({ params }: Props) {
             step="0.01"
             name="valor"
             defaultValue={pagamento.valor}
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label>Valor cliente a receber</label>
+          <input
+            type="number"
+            step="0.01"
+            name="valorClienteAReceber"
+            defaultValue={pagamento.valorClienteAReceber ?? ""}
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

@@ -53,6 +53,10 @@ async function atualizarCliente(formData: FormData) {
         ? new Date(formData.get("dataProvavelParto") as string)
         : null,
 
+      dataNascimento: formData.get("dataNascimento")
+        ? new Date(formData.get("dataNascimento") as string)
+        : null,
+
       tempoGestacaoSemanas: formData.get("tempoGestacaoSemanas")
         ? Number(formData.get("tempoGestacaoSemanas"))
         : null,
@@ -182,6 +186,20 @@ export default async function EditarCliente({ params }: Props) {
                 : ""
             }
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"            
+          />
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label>Data Nascimento</label>
+          <input
+            type="date"
+            name="dataNascimento"
+            defaultValue={
+              cliente.dataNascimento
+                ? cliente.dataNascimento.toISOString().split("T")[0]
+                : ""
+            }
+            className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
         
