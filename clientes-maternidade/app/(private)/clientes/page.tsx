@@ -266,7 +266,9 @@ export default async function Clientes({ searchParams }: PageProps) {
             cursor: "pointer",
           }}
         >
-          <option value="">Mês do provável parto</option>
+          <option value="" disabled hidden>
+            Mês do provável parto
+          </option>
 
           {meses.map((mes) => (
             <option key={mes.valor} value={mes.valor}>
@@ -288,6 +290,24 @@ export default async function Clientes({ searchParams }: PageProps) {
         >
           Buscar
         </button>
+
+        {mesParto && (
+          <a
+            href={`/api/clientes/relatorio?mesParto=${mesParto}`}
+            style={{
+              padding: "10px 16px",
+              borderRadius: "8px",
+              border: "none",
+              backgroundColor: "#059669",
+              color: "white",
+              cursor: "pointer",
+              textDecoration: "none",
+              display: "inline-block",
+            }}
+          >
+            Baixar Relatório Nascimentos
+          </a>
+        )}
       </form>
       
       <div
