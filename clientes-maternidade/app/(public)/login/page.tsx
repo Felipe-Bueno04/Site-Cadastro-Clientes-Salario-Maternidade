@@ -51,6 +51,7 @@ export default function LoginPage() {
           placeholder="Email"
           className="border p-2"
           onChange={(e) => setEmail(e.target.value)}
+          autoComplete="off"
         />
 
         <input
@@ -58,6 +59,7 @@ export default function LoginPage() {
           placeholder="Senha"
           className="border p-2"
           onChange={(e) => setPassword(e.target.value)}
+          autoComplete="off"
         />
 
         {/* 🔴 Mensagem de erro */}
