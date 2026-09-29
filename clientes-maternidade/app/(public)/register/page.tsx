@@ -2,20 +2,30 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import { validateEmail } from "@/lib/formatters"
 
 export default function RegisterPage() {
     const [role, setRole] = useState("ADMIN")
+    const [error, setError] = useState("")
 
     const router = useRouter()
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
         e.preventDefault()
+        setError("")
 
         const formData = new FormData(e.currentTarget)
 
+        const email = formData.get("email") as string
+
+        if (!validateEmail(email)) {
+            setError("E-mail inválido. Use um formato válido (ex: usuario@gmail.com)")
+            return
+        }
+
         const data = {
             name: formData.get("name") as string,
-            email: formData.get("email") as string,
+            email: email.toLowerCase(),
             password: formData.get("password") as string,
             role,
             adminCode: formData.get("adminCode") as string | null,
@@ -29,14 +39,14 @@ export default function RegisterPage() {
             body: JSON.stringify(data),
         })
 
-        if(!res.ok) {
-            alert("Erro ao cadastrar!")
+        if (!res.ok) {
+            const errorText = await res.text()
+            setError(errorText)
             return
         }
 
         alert("Cadastro realizado com sucesso!")
 
-        // Redirect automático tela login
         router.push("/login")
     }
 
@@ -50,17 +60,26 @@ export default function RegisterPage() {
                     Criar Conta
                 </h1>
 
+                {error && (
+                    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm">
+                        {error}
+                    </div>
+                )}
+
                 <input 
                     name="name" 
                     placeholder="Nome" 
                     required
+                    autoComplete="off"
                     className="w-full border p-2 rounded"
                 />
 
                 <input 
                     name="email" 
-                    placeholder="Email" 
+                    placeholder="usuario@gmail.com" 
                     required
+                    type="email"
+                    autoComplete="off"
                     className="w-full border p-2 rounded"
                 />
                 
@@ -68,6 +87,7 @@ export default function RegisterPage() {
                     name="password" 
                     placeholder="Senha" 
                     required
+                    autoComplete="off"
                     className="w-full border p-2 rounded"
                 />
 
@@ -84,6 +104,7 @@ export default function RegisterPage() {
                         name="adminCode" 
                         placeholder="Código do Admin" 
                         required
+                        autoComplete="off"
                         className="w-full border p-2 rounded"    
                     />
                 )}
