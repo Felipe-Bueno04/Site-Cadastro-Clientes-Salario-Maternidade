@@ -12,6 +12,7 @@ import {
 import { notFound } from "next/navigation"
 import { getAdminId } from "@/lib/getAdminId"
 import { FormCard } from "@/components/FormCard"
+import { validateEmail, validateCPF, validateTelefone, formatCPF, formatTelefone } from "@/lib/formatters"
 
 export const dynamic = "force-dynamic"
 
@@ -36,13 +37,29 @@ async function atualizarCliente(formData: FormData) {
     notFound()
   }
 
+  const rawCpf = formData.get("cpf") as string
+  const rawTelefone = formData.get("telefone") as string
+  const rawEmail = (formData.get("email") as string) || null
+
+  if (!validateEmail(rawEmail || "")) {
+    throw new Error("E-mail inválido")
+  }
+
+  if (!validateCPF(rawCpf)) {
+    throw new Error("CPF inválido")
+  }
+
+  if (!validateTelefone(rawTelefone)) {
+    throw new Error("Telefone inválido")
+  }
+
   await prisma.cliente.update({
     where: { idCliente: id },
     data: {
       nomeCompleto: formData.get("nomeCompleto") as string,
-      cpf: formData.get("cpf") as string,
-      telefone: formData.get("telefone") as string,
-      email: (formData.get("email") as string) || null,
+      cpf: formatCPF(rawCpf),
+      telefone: formatTelefone(rawTelefone),
+      email: rawEmail?.toLowerCase() || null,
       instagram: (formData.get("instagram") as string) || null,
       criadoPor: (formData.get("origemParceira") as string) || null,
 
@@ -114,6 +131,7 @@ export default async function EditarCliente({ params }: Props) {
             placeholder="Nome Completo"
             defaultValue={cliente.nomeCompleto} 
             required
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -123,8 +141,10 @@ export default async function EditarCliente({ params }: Props) {
           <input 
             name="cpf"
             defaultValue={cliente.cpf}
-            placeholder="CPF" 
+            placeholder="000.000.000-00" 
             required
+            maxLength={14}
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -134,8 +154,10 @@ export default async function EditarCliente({ params }: Props) {
           <input 
             name="telefone"
             defaultValue={cliente.telefone}
-            placeholder="Telefone" 
+            placeholder="(00)00000-0000" 
             required
+            maxLength={15}
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -145,8 +167,10 @@ export default async function EditarCliente({ params }: Props) {
           <input 
             name="email"
             defaultValue={cliente.email ?? ""} 
-            placeholder="Email" 
+            placeholder="usuario@gmail.com" 
             required
+            type="email"
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -157,6 +181,7 @@ export default async function EditarCliente({ params }: Props) {
             name="instagram"
             defaultValue={cliente.instagram ?? ""} 
             placeholder="@perfil" 
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -185,6 +210,7 @@ export default async function EditarCliente({ params }: Props) {
                 ? cliente.dataProvavelParto.toISOString().split("T")[0]
                 : ""
             }
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"            
           />
         </div>
@@ -199,6 +225,7 @@ export default async function EditarCliente({ params }: Props) {
                 ? cliente.dataNascimento.toISOString().split("T")[0]
                 : ""
             }
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -210,6 +237,7 @@ export default async function EditarCliente({ params }: Props) {
             defaultValue={cliente.tempoGestacaoSemanas ?? ""}
             placeholder="Semanas de gestação"
             type="number"
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"            
           />
         </div>
@@ -236,6 +264,7 @@ export default async function EditarCliente({ params }: Props) {
             name="senhaGov"
             defaultValue={cliente.senhaGov ?? ""}
             placeholder="Senha GOV" 
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -310,6 +339,7 @@ export default async function EditarCliente({ params }: Props) {
             name="observacoes" 
             rows={4}
             defaultValue={cliente.observacoes ?? ""}
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
