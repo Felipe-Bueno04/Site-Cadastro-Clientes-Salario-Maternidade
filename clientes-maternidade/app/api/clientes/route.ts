@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
+import { validateEmail, validateCPF, validateTelefone } from "@/lib/formatters"
 
 export const dynamic = "force-dynamic" // 🔥 evita cache
 
@@ -36,6 +37,18 @@ export async function GET() {
 export async function POST(request: Request) {
   const body = await request.json()
 
+  if (!validateEmail(body.email)) {
+    return new Response("E-mail inválido", { status: 400 })
+  }
+
+  if (!validateCPF(body.cpf)) {
+    return new Response("CPF inválido", { status: 400 })
+  }
+
+  if (!validateTelefone(body.telefone)) {
+    return new Response("Telefone inválido", { status: 400 })
+  }
+
   const session = await getServerSession(authOptions)
 
   if (!session?.user) {
@@ -56,7 +69,7 @@ export async function POST(request: Request) {
       nomeCompleto: body.nomeCompleto,
       cpf: body.cpf,
       telefone: body.telefone,
-      email: body.email,
+      email: body.email.toLowerCase(),
       instagram: body.instagram,
       recebeBolsaFamilia: body.recebeBolsaFamilia,
       tempoGestacaoSemanas: body.tempoGestacaoSemanas,
