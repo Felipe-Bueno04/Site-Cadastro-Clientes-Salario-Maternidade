@@ -2,6 +2,7 @@
 
 import { FormCard } from "@/components/FormCard"
 import { useState } from "react"
+import { formatCPF, formatTelefone, validateEmail, validateCPF, validateTelefone } from "@/lib/formatters"
 
 export default function CriarCliente() {
   const [mensagem, setMensagem] = useState("")
@@ -20,11 +21,33 @@ export default function CriarCliente() {
 
     const form = event.currentTarget
 
+    const rawCpf = (form.cpf as HTMLInputElement).value
+    const rawTelefone = (form.telefone as HTMLInputElement).value
+    const rawEmail = (form.email as HTMLInputElement).value
+
+    if (!validateEmail(rawEmail)) {
+      setErro("E-mail inválido. Use um formato válido (ex: usuario@gmail.com)")
+      setSalvando(false)
+      return
+    }
+
+    if (!validateCPF(rawCpf)) {
+      setErro("CPF inválido. Deve conter 11 dígitos válidos.")
+      setSalvando(false)
+      return
+    }
+
+    if (!validateTelefone(rawTelefone)) {
+      setErro("Telefone inválido. Deve conter 11 dígitos (DDD + 9xxxxxxxx).")
+      setSalvando(false)
+      return
+    }
+
     const data = {
       nomeCompleto: (form.nomeCompleto as HTMLInputElement).value,
-      cpf: (form.cpf as HTMLInputElement).value,
-      telefone: (form.telefone as HTMLInputElement).value,
-      email: (form.email as HTMLInputElement).value,
+      cpf: formatCPF(rawCpf),
+      telefone: formatTelefone(rawTelefone),
+      email: rawEmail.toLowerCase(),
       instagram: (form.instagram as HTMLInputElement).value,
       recebeBolsaFamilia:
         (form.recebeBolsaFamilia as HTMLSelectElement).value === "true",
@@ -117,6 +140,7 @@ export default function CriarCliente() {
             name="nomeCompleto" 
             placeholder="Nome Completo" 
             required
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -125,8 +149,14 @@ export default function CriarCliente() {
           <label>CPF</label>
           <input 
             name="cpf" 
-            placeholder="CPF" 
+            placeholder="000.000.000-00" 
             required
+            maxLength={14}
+            autoComplete="off"
+            onChange={(e) => {
+              const formatted = formatCPF(e.target.value)
+              e.target.value = formatted
+            }}
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -135,8 +165,14 @@ export default function CriarCliente() {
           <label>Telefone</label>
           <input 
             name="telefone" 
-            placeholder="Telefone" 
+            placeholder="(00)00000-0000" 
             required
+            maxLength={15}
+            autoComplete="off"
+            onChange={(e) => {
+              const formatted = formatTelefone(e.target.value)
+              e.target.value = formatted
+            }}
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -145,8 +181,13 @@ export default function CriarCliente() {
           <label>Email</label>
           <input 
             name="email" 
-            placeholder="Email" 
+            placeholder="usuario@gmail.com" 
             required
+            type="email"
+            autoComplete="off"
+            onChange={(e) => {
+              e.target.value = e.target.value.toLowerCase()
+            }}
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -156,6 +197,7 @@ export default function CriarCliente() {
           <input 
             name="instagram" 
             placeholder="@perfil" 
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500" 
           />
         </div>
@@ -180,6 +222,7 @@ export default function CriarCliente() {
           <input 
             type="date" 
             name="dataProvavelParto"
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -190,6 +233,7 @@ export default function CriarCliente() {
             name="tempoGestacaoSemanas"
             placeholder="Semanas de gestação"
             type="number"
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -214,6 +258,7 @@ export default function CriarCliente() {
           <input 
             name="senhaGov" 
             placeholder="Senha GOV" 
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -282,6 +327,7 @@ export default function CriarCliente() {
           <textarea 
             name="observacoes" 
             rows={4} 
+            autoComplete="off"
             className="border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
