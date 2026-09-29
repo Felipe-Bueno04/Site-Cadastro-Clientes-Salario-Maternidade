@@ -247,6 +247,7 @@ export default async function Clientes({ searchParams }: PageProps) {
           name="busca"
           placeholder="Buscar por nome ou CPF..."
           defaultValue={busca ?? ""}
+          autoComplete="off"
           style={{
             padding: "10px",
             width: "250px",
