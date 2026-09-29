@@ -383,6 +383,7 @@ export default async function FinanceiroPage({
           name="cliente"
           placeholder="Buscar por nome ou CPF..."
           defaultValue={clienteBusca || ""}
+          autoComplete="off"
           style={{
             padding: "10px 14px",
             borderRadius: "8px",
